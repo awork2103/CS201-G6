@@ -21,8 +21,14 @@ public class CustomHashMap {
         table.remove(id);
     }
 
+    // Get Entry in table given a key (string => id)
     public HashMap<String,String> getEntry(String id) {
         return table.get(id);
+    }
+
+    // Get all keys in table
+    public Set<String> getKeys() {
+        return table.keySet();
     }
 
     public String getTableName() {

@@ -1,8 +1,8 @@
-package edu.smu.smusql;
+// package edu.smu.smusql;
 
-import java.util.*;
-import java.util.Map.*;
+// import java.util.*;
+// import java.util.Map.*;
 
-public class UnsortedTableMap<K,V> extends HashMap<K,V> {
+// public class UnsortedTableMap<K,V> extends HashMap<K,V> {
     
-}
+// }
