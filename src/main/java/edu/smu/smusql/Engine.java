@@ -106,7 +106,7 @@ public class Engine {
             Set<String> idsToDelete = new HashSet<>();
 
             // Loop through the table to find matching entries
-            for (String id : table.table.keySet()) {
+            for (String id : table.getKeys()) {
                 HashMap<String, String> entry = table.getEntry(id);
                 if (entry != null) {
                     String columnValue = entry.get(column);
@@ -151,9 +151,9 @@ public class Engine {
         result.append(String.join("\t", columns)).append("\n"); // Print column headers
 
         // Iterate through the table entries (each entry represents a row)
-        for (String key : table.keySet()) {
+        for (String key : table.getKeys()) {
             // Get the entry (row) by ID
-            Map<String, String> entry = table.get(key);
+            Map<String, String> entry = table.getEntry(key);
             if (entry == null) {
                 continue;
             }
@@ -225,7 +225,7 @@ public class Engine {
     
         // Update the matching entries in the table
         int updatedCount = 0;
-        for (String key : table.table.keySet()) {
+        for (String key : table.getKeys()) {
             Map<String, String> entry = table.getEntry(key);
             if (entry == null) {
                 continue;
