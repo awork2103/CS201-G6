@@ -18,6 +18,10 @@ public class HashMapPlusTree {
         }
     }  
 
+    public HashMap<String, HashMap<String, String>> getTable() {
+        return new HashMap<>(table);  // Return a shallow copy of the table to avoid external modification
+    }
+
     public void addEntry(HashMap<String, String> entry) {
         table.put(entry.get("ID"), entry);
         
