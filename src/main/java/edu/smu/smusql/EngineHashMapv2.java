@@ -112,7 +112,7 @@ public class EngineHashMapv2 {
 
             // Loop through the table to find matching entries
             for (String id : table.getKeys()) {
-                HashMap<String, String> entry = table.getEntry(id);
+                HashMapv2<String, String> entry = table.getEntry(id);
                 if (entry != null) {
                     String columnValue = entry.get(column);
 
