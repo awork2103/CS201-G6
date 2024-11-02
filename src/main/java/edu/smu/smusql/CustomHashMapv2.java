@@ -1,19 +1,19 @@
 package edu.smu.smusql;
-
 import java.util.*;
 
-public class CustomHashMap {
+public class CustomHashMapv2 {
     private String tableName;
     private List<String> columns;
-    private HashMap<String, HashMap<String, String>> table;
+    private HashMapv2<String, HashMapv2<String, String>> table;
 
-    public CustomHashMap(String tableName, List<String> columns) {
+    public CustomHashMapv2(String tableName, List<String> columns) {
         this.tableName = tableName;
         this.columns = columns;
-        this.table = new HashMap<String, HashMap<String, String>>();
+        // HashMapv2(int capacity, float loadFactor, int hashMultiplier, String hashingStrategy)
+        this.table = new HashMapv2<String, HashMapv2<String, String>>(16, 0.75, 31, "BITWISE");
     }  
 
-    public void addEntry(HashMap<String, String> entry) {
+    public void addEntry(HashMapv2<String, String> entry) {
         table.put(entry.get("ID"), entry);
     }
 
@@ -23,7 +23,7 @@ public class CustomHashMap {
     }
 
     // Get Entry in table given a key (string => id)
-    public HashMap<String,String> getEntry(String id) {
+    public HashMapv2<String,String> getEntry(String id) {
         return table.get(id);
     }
 

@@ -6,6 +6,7 @@ public class HashMapPlusTree {
     private String tableName;
     private List<String> columns;
     private HashMap<String, HashMap<String, String>> table;
+    // TreeMap<ID, Colummn Value>
     ArrayList<TreeMap<String, String>> tree = new ArrayList<TreeMap<String, String>>();
 
     public HashMapPlusTree(String tableName, List<String> columns) {
@@ -19,7 +20,7 @@ public class HashMapPlusTree {
     }  
 
     public HashMap<String, HashMap<String, String>> getTable() {
-        return new HashMap<>(table);  // Return a shallow copy of the table to avoid external modification
+        return table;  
     }
 
     public void addEntry(HashMap<String, String> entry) {
