@@ -32,6 +32,19 @@ class HashMapv2<K, V> {
         }
     }
 
+    public boolean containsKey(K key) {
+        int bucketIndex = getBucketIndex(key);
+
+        if (buckets[bucketIndex] != null) {
+            for (Entry<K, V> entry : buckets[bucketIndex]) {
+                if (entry.key.equals(key)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // Bitwise Hashing
     private int customBitwiseHashCode(K key) {
         // Typecast Key into a String (since ID is a string)
