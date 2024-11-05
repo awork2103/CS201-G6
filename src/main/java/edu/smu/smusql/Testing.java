@@ -46,6 +46,7 @@ public class Testing {
         }
         prepopulateUserTable(random,  dbEngine,  numberOfQueries);
         selectFromUsers(dbEngine);
+        System.out.println(dbEngine.executeSQL("SELECT * FROM users WHERE id = 1"));
         updateRandomDataUsersTable(random, dbEngine, numberOfQueries);
         selectFromUsers(dbEngine);
         deleteRandomData(dbEngine, numberOfQueries);
@@ -54,7 +55,27 @@ public class Testing {
 
     }
 
-    
+    public static void testing2tables( Engine dbEngine, Random random){
+
+        dbEngine.executeSQL("CREATE TABLE products (id, name, price, category)");
+        dbEngine.executeSQL("CREATE TABLE users (id, name, age, city)");
+
+        long numberOfQueries = 10;
+        prepopulateUserTable(random, dbEngine, numberOfQueries );
+
+        for (int i = 0; i < 10; i++){
+            int productId = i;
+            String productName = "Product" + productId;
+            double price = 50 + (random.nextDouble() * 1000);
+            String category = getRandomCategory(random);
+            String insertProductQuery = "INSERT INTO products VALUES (" + productId + ", '" + productName + "', " + price + ", '" + category + "')";
+            System.out.println(dbEngine.executeSQL(insertProductQuery));
+        }
+
+        System.out.println(dbEngine.executeSQL("SELECT * FROM products"));
+        selectFromUsers(dbEngine);
+
+    }
 
 
 

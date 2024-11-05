@@ -10,7 +10,7 @@ public class CustomHashMapv2 {
         this.tableName = tableName;
         this.columns = columns;
         // HashMapv2(int capacity, float loadFactor, int hashMultiplier, String hashingStrategy)
-        this.table = new HashMapv2<String, HashMapv2<String, String>>(16, 0.75, 31, "BITWISE");
+        this.table = new HashMapv2<String, HashMapv2<String, String>>(16, 0.75, 31, "ADDITIVE");
     }  
 
     public void addEntry(HashMapv2<String, String> entry) {

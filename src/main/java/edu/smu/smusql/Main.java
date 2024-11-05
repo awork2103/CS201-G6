@@ -30,18 +30,19 @@ public class Main {
                 double elapsedTimeInSecond = (double) elapsedTime / 1_000_000_000;
                 System.out.println("Time elapsed: " + elapsedTimeInSecond + " seconds");
                 break;
+
+            // testing CRUD functionality for 
+
+
             }else if (query.equalsIgnoreCase("1tablecrud")) {
 
-                // System.out.println("HashMap Engine 10000 entries");
-                // Testing.testingCRUDOnlyUserTable("10000", new EngineHashMapv2(), new Random());
+                Testing.testingCRUDOnlyUserTable("10", new EngineHashMapv2(), new Random());
 
-                Testing.testingCRUDOnlyUserTable("10", new EngineHashMapPlusTree(), new Random());
 
-                // System.out.println("HashMap+tree Engine 10000 entries");
-                // Testing.testingCRUDOnlyUserTable("10000", new EngineHashMapPlusTree(), new Random());
+            // inserting into 2 tables and see if it works
 
-                // System.out.println("HashMap+tree Engine 1000000 entries");
-                // Testing.testingCRUDOnlyUserTable("million", new EngineHashMapPlusTree(), new Random());
+            }else if (query.equalsIgnoreCase("2tables")) { 
+                Testing.testing2tables(new EngineHashMapv2(), new Random());
             }
 
             System.out.println(dbEngine.executeSQL(query));
