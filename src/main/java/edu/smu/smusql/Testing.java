@@ -1,143 +1,55 @@
 package edu.smu.smusql;
-
 import java.util.*;
-import edu.smu.smusql.Testing;
+import edu.smu.smusql.Engine;
+import edu.smu.smusql.EngineHashMapv2;
+import edu.smu.smusql.EngineHashMapPlusTree;
 
-// @author ziyuanliu@smu.edu.sg
+public class Testing {
 
-public class Main {
-    /*
-     *  Main method for accessing the command line interface of the database engine.
-     *  MODIFICATION OF THIS FILE IS NOT RECOMMENDED!
-     */
-    static Engine dbEngine = new EngineHashMapPlusTree();
-    public static void main(String[] args) {
+    private static final long MEGABYTE = 1024L * 1024L;
+    private static final long nano = 1000000000;
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("smuSQL Starter Code version 0.5");
-        System.out.println("Have fun, and good luck!");
+    public static double nanosecondsToSeconds(double nanoSeconds){
+        return nanoSeconds / nano;
+    }
 
-        while (true) {
-            System.out.print("smusql> ");
-            String query = scanner.nextLine();
-            if (query.equalsIgnoreCase("exit")) {
+    public static long bytesToMegabytes(long bytes) {
+        return bytes / MEGABYTE;
+    }
+    
+    public static void testingCRUDOnlyUserTable( String selected, Engine dbEngine, Random random){
+
+        System.out.println();
+
+        long numberOfQueries = 0;
+
+        switch(selected){
+            case "10":
+                numberOfQueries = 10;
                 break;
-            } else if (query.equalsIgnoreCase("evaluate")) {
-                long startTime = System.nanoTime();
-                autoEvaluate();
-                long stopTime = System.nanoTime();
-                long elapsedTime = stopTime - startTime;
-                double elapsedTimeInSecond = (double) elapsedTime / 1_000_000_000;
-                System.out.println("Time elapsed: " + elapsedTimeInSecond + " seconds");
+
+            case "10000":
+                numberOfQueries = 10000;
                 break;
-            }else if (query.equalsIgnoreCase("1tablecrud")) {
 
-                // System.out.println("HashMap Engine 10000 entries");
-                // Testing.testingCRUDOnlyUserTable("10000", new EngineHashMapv2(), new Random());
+            case "million":
+                numberOfQueries = 1000000;
+                break;
 
-                System.out.println("HashMap Engine 1000000 entries");
-                Testing.testingCRUDOnlyUserTable("million", new EngineHashMapv2(), new Random());
-
-                // System.out.println("HashMap+tree Engine 10000 entries");
-                // Testing.testingCRUDOnlyUserTable("10000", new EngineHashMapPlusTree(), new Random());
-
-                // System.out.println("HashMap+tree Engine 1000000 entries");
-                // Testing.testingCRUDOnlyUserTable("million", new EngineHashMapPlusTree(), new Random());
-            }
-
-            //System.out.println(dbEngine.executeSQL(query));
+                
         }
-        scanner.close();
+        prepopulateUserTable(random,  dbEngine,  numberOfQueries);
+        selectFromUsers( dbEngine);
+        updateRandomDataUsersTable(random, dbEngine, numberOfQueries);
+        deleteRandomData(dbEngine, numberOfQueries);
+
+
     }
 
 
-    /*
-     *  Below is the code for auto-evaluating your work.
-     *  DO NOT CHANGE ANYTHING BELOW THIS LINE!
-     */
-    public static void autoEvaluate() {
-
-        // Set the number of queries to execute
-        int numberOfQueries = 1000000;
-
-        // Create tables
-        dbEngine.executeSQL("CREATE TABLE users (id, name, age, city)");
-        dbEngine.executeSQL("CREATE TABLE products (id, name, price, category)");
-        dbEngine.executeSQL("CREATE TABLE orders (id, user_id, product_id, quantity)");
-
-        // Random data generator
-        Random random = new Random();
-
-        // Prepopulate the tables in preparation for evaluation
-        prepopulateTables(random);
-
-        // Loop to simulate millions of queries
-        for (int i = 0; i < numberOfQueries; i++) {
-            int queryType = random.nextInt(6);  // Randomly choose the type of query to execute
-
-            switch (queryType) {
-                case 0:  // INSERT query
-                    insertRandomData(random);
-                    break;
-                case 1:  // SELECT query (simple)
-                    selectRandomData(random);
-                    break;
-                case 2:  // UPDATE query
-                    updateRandomData(random);
-                    break;
-                case 3:  // DELETE query
-                    deleteRandomData(random);
-                    break;
-                case 4:  // Complex SELECT query with WHERE, AND, OR, >, <, LIKE
-                    complexSelectQuery(random);
-                    break;
-                case 5:  // Complex UPDATE query with WHERE
-                    complexUpdateQuery(random);
-                    break;
-            }
-
-            // Print progress every 100,000 queries
-            if (i % 10000 == 0){
-                System.out.println("Processed " + i + " queries...");
-            }
-        }
-
-        System.out.println("Finished processing " + numberOfQueries + " queries.");
-    }
-
-    private static void prepopulateTables(Random random) {
-        System.out.println("Prepopulating users");
-        // Insert initial users
-        for (int i = 0; i < 50; i++) {
-            String name = "User" + i;
-            int age = 20 + (i % 41); // Ages between 20 and 60
-            String city = getRandomCity(random);
-            String insertCommand = String.format("INSERT INTO users VALUES (%d, '%s', %d, '%s')", i, name, age, city);
-            dbEngine.executeSQL(insertCommand);
-        }
-        System.out.println("Prepopulating products");
-        // Insert initial products
-        for (int i = 0; i < 50; i++) {
-            String productName = "Product" + i;
-            double price = 10 + (i % 990); // Prices between $10 and $1000
-            String category = getRandomCategory(random);
-            String insertCommand = String.format("INSERT INTO products VALUES (%d, '%s', %.2f, '%s')", i, productName, price, category);
-            dbEngine.executeSQL(insertCommand);
-        }
-        System.out.println("Prepopulating orders");
-        // Insert initial orders
-        for (int i = 0; i < 50; i++) {
-            int user_id = random.nextInt(9999);
-            int product_id = random.nextInt(9999);
-            int quantity = random.nextInt(1, 100);
-            String category = getRandomCategory(random);
-            String insertCommand = String.format("INSERT INTO orders VALUES (%d, %d, %d, %d)", i, user_id, product_id, quantity);
-            dbEngine.executeSQL(insertCommand);
-        }
-    }
 
     // Helper method to insert random data into users, products, or orders table
-    private static void insertRandomData(Random random) {
+    private static void insertRandomData(Random random,  Engine dbEngine) {
         int tableChoice = random.nextInt(3);
         switch (tableChoice) {
             case 0: // Insert into users table
@@ -168,7 +80,7 @@ public class Main {
     }
 
     // Helper method to randomly select data from tables
-    private static void selectRandomData(Random random) {
+    private static void selectRandomData(Random random,  Engine dbEngine) {
         int tableChoice = random.nextInt(3);
         String selectQuery;
         switch (tableChoice) {
@@ -187,8 +99,10 @@ public class Main {
         dbEngine.executeSQL(selectQuery);
     }
 
+    
+
     // Helper method to update random data in the tables
-    private static void updateRandomData(Random random) {
+    private static void updateRandomData(Random random,  Engine dbEngine) {
         int tableChoice = random.nextInt(3);
         switch (tableChoice) {
             case 0: // Update users table
@@ -212,8 +126,10 @@ public class Main {
         }
     }
 
+    
+
     // Helper method to delete random data from tables
-    private static void deleteRandomData(Random random) {
+    private static void deleteRandomData(Random random,  Engine dbEngine) {
         int tableChoice = random.nextInt(3);
         switch (tableChoice) {
             case 0: // Delete from users table
@@ -235,7 +151,7 @@ public class Main {
     }
 
     // Helper method to execute a complex SELECT query with WHERE, AND, OR, >, <, LIKE
-    private static void complexSelectQuery(Random random) {
+    private static void complexSelectQuery(Random random,  Engine dbEngine) {
         int tableChoice = random.nextInt(2);  // Complex queries only on users and products for now
         String complexSelectQuery;
         switch (tableChoice) {
@@ -262,7 +178,7 @@ public class Main {
     }
 
     // Helper method to execute a complex UPDATE query with WHERE
-    private static void complexUpdateQuery(Random random) {
+    private static void complexUpdateQuery(Random random,  Engine dbEngine) {
         int tableChoice = random.nextInt(2);  // Complex updates only on users and products for now
         switch (tableChoice) {
             case 0: // Complex UPDATE on users
@@ -290,5 +206,115 @@ public class Main {
     private static String getRandomCategory(Random random) {
         String[] categories = {"Electronics", "Appliances", "Clothing", "Furniture", "Toys", "Sports", "Books", "Beauty", "Garden"};
         return categories[random.nextInt(categories.length)];
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    // USERS TABLE specific CRUD functionality
+
+    private static void selectFromUsers(Engine dbEngine) {
+
+        System.out.println("SELECT ALL");
+        String selectQuery = "SELECT * FROM users";
+
+        long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+        double start = nanosecondsToSeconds(System.nanoTime());
+        dbEngine.executeSQL(selectQuery);
+
+
+        double end = nanosecondsToSeconds(System.nanoTime());
+        long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+
+        long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
+        double timeTaken = nanosecondsToSeconds(end - start);
+
+        System.out.println("Time elapsed " + timeTaken + " seconds");
+        System.out.println("Memory used " + actualMemUsed + " MB");
+        System.out.println();
+    }
+
+    private static void updateRandomDataUsersTable(Random random, Engine dbEngine, long number){
+
+        System.out.println("UPDATING");
+        
+        long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+        double start = nanosecondsToSeconds(System.nanoTime());
+
+        for (long i = 0; i < number; i++) {
+            int id = random.nextInt(10000) + 1;
+            int newAge = random.nextInt(60) + 20;
+            String updateUserQuery = "UPDATE users SET age = " + newAge + " WHERE id = " + id;
+            dbEngine.executeSQL(updateUserQuery);
+        }
+
+        double end = nanosecondsToSeconds(System.nanoTime());
+        long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+
+        long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
+        double timeTaken = nanosecondsToSeconds(end - start);
+
+        System.out.println("Time elapsed " + timeTaken + " seconds");
+        System.out.println("Memory used " + actualMemUsed + " MB");
+        System.out.println();
+    }
+
+    private static void prepopulateUserTable(Random random, Engine dbEngine, long number) {
+
+        System.out.println("Prepopulating users");
+
+        long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+        double start = nanosecondsToSeconds(System.nanoTime());
+
+        // Insert initial users
+        for (long i = 0; i < number; i++) {
+            String name = "User" + i;
+            int age = 20 + random.nextInt(40); // Ages between 20 and 60
+            String city = getRandomCity(random);
+            String insertCommand = String.format("INSERT INTO users VALUES (%d, '%s', %d, '%s')", i, name, age, city);
+            dbEngine.executeSQL(insertCommand);
+        }
+
+        double end = nanosecondsToSeconds(System.nanoTime());
+        long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+
+        long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
+        double timeTaken = nanosecondsToSeconds(end - start);
+
+        System.out.println("Time elapsed " + timeTaken + " seconds");
+        System.out.println("Memory used " + actualMemUsed + " MB");
+        System.out.println();
+
+    }
+
+    private static void deleteRandomData(Engine dbEngine, long number) {
+
+        System.out.println("DELETING");
+
+        long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+        double start = nanosecondsToSeconds(System.nanoTime());
+
+        for (long i = 0; i < number; i++) {
+            String deleteUserQuery = "DELETE FROM users WHERE id = " + i;
+            dbEngine.executeSQL(deleteUserQuery);
+        }
+
+        double end = nanosecondsToSeconds(System.nanoTime());
+        long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+
+        long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
+        double timeTaken = nanosecondsToSeconds(end - start);
+
+        System.out.println("Time elapsed " + timeTaken + " seconds");
+        System.out.println("Memory used " + actualMemUsed + " MB");
+        System.out.println();
     }
 }

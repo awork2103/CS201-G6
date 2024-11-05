@@ -7,8 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+//import edu.smu.smusql.HashMapv2;    
 
-public class EngineHashMapv2 {
+public class EngineHashMapv2 extends Engine{
     //Store the SQL Tables
     // engine for the CustomHashMapv2
     private Map<String, CustomHashMapv2> tables = new HashMap<>();
@@ -61,7 +62,7 @@ public class EngineHashMapv2 {
         }
 
         // Create the entry to insert
-        HashMap<String, String> entry = new HashMap<>();
+        HashMapv2<String, String> entry = new HashMapv2<>(columnNames.length, 1, 2, "BITWISE");
         for (int i = 0; i < columnNames.length; i++) {
             entry.put(columnNames[i].trim(), values[i].trim());
         }

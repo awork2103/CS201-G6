@@ -2,7 +2,7 @@ package edu.smu.smusql;
 
 import java.util.*;
 
-public class EngineHashMapPlusTree {
+public class EngineHashMapPlusTree extends Engine{
 
     private Map<String, HashMapPlusTree> tables = new HashMap<>();
 
