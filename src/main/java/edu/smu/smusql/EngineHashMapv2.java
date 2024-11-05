@@ -61,14 +61,16 @@ public class EngineHashMapv2 extends Engine{
             return "ERROR: Number of columns does not match number of values";
         }
 
+
         // Create the entry to insert
         HashMapv2<String, String> entry = new HashMapv2<>(columnNames.length, 1, 2, "BITWISE");
         for (int i = 0; i < columnNames.length; i++) {
-            entry.put(columnNames[i].trim(), values[i].trim());
+            entry.put(columns.get(i).trim(), values[i].trim());
         }
 
+
         // Ensure the ID is provided
-        if (!entry.containsKey("ID")) {
+        if (!entry.containsKey("id")) {
             return "ERROR: Entry must have an ID";
         }
 

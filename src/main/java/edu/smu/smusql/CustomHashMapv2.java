@@ -14,7 +14,7 @@ public class CustomHashMapv2 {
     }  
 
     public void addEntry(HashMapv2<String, String> entry) {
-        table.put(entry.get("ID"), entry);
+        table.put(entry.get("id"), entry);
     }
 
 

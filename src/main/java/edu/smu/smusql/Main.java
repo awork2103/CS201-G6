@@ -35,8 +35,7 @@ public class Main {
                 // System.out.println("HashMap Engine 10000 entries");
                 // Testing.testingCRUDOnlyUserTable("10000", new EngineHashMapv2(), new Random());
 
-                System.out.println("HashMap Engine 1000000 entries");
-                Testing.testingCRUDOnlyUserTable("million", new EngineHashMapv2(), new Random());
+                Testing.testingCRUDOnlyUserTable("10", new EngineHashMapPlusTree(), new Random());
 
                 // System.out.println("HashMap+tree Engine 10000 entries");
                 // Testing.testingCRUDOnlyUserTable("10000", new EngineHashMapPlusTree(), new Random());
@@ -45,7 +44,7 @@ public class Main {
                 // Testing.testingCRUDOnlyUserTable("million", new EngineHashMapPlusTree(), new Random());
             }
 
-            //System.out.println(dbEngine.executeSQL(query));
+            System.out.println(dbEngine.executeSQL(query));
         }
         scanner.close();
     }

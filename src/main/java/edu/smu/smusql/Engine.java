@@ -58,11 +58,11 @@ public class Engine {
         // Create the entry to insert
         HashMap<String, String> entry = new HashMap<>();
         for (int i = 0; i < columnNames.length; i++) {
-            entry.put(columnNames[i].trim(), values[i].trim());
+            entry.put(columns.get(i), values[i].trim());
         }
 
         // Ensure the ID is provided
-        if (!entry.containsKey("ID")) {
+        if (!entry.containsKey("id")) {
             return "ERROR: Entry must have an ID";
         }
 

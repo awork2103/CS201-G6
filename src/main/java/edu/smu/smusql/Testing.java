@@ -21,11 +21,17 @@ public class Testing {
 
         System.out.println();
 
-        long numberOfQueries = 0;
+        long numberOfQueries = 10;
+
+        dbEngine.executeSQL("CREATE TABLE users (id, name, age, city)");
 
         switch(selected){
             case "10":
                 numberOfQueries = 10;
+                break;
+
+            case "100":
+                numberOfQueries = 100;
                 break;
 
             case "10000":
@@ -39,12 +45,16 @@ public class Testing {
                 
         }
         prepopulateUserTable(random,  dbEngine,  numberOfQueries);
-        selectFromUsers( dbEngine);
+        selectFromUsers(dbEngine);
         updateRandomDataUsersTable(random, dbEngine, numberOfQueries);
+        selectFromUsers(dbEngine);
         deleteRandomData(dbEngine, numberOfQueries);
+        selectFromUsers(dbEngine);
 
 
     }
+
+    
 
 
 
@@ -208,64 +218,7 @@ public class Testing {
         return categories[random.nextInt(categories.length)];
     }
 
-
-
-
-
-
-
-
-
-
-
-
     // USERS TABLE specific CRUD functionality
-
-    private static void selectFromUsers(Engine dbEngine) {
-
-        System.out.println("SELECT ALL");
-        String selectQuery = "SELECT * FROM users";
-
-        long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-        double start = nanosecondsToSeconds(System.nanoTime());
-        dbEngine.executeSQL(selectQuery);
-
-
-        double end = nanosecondsToSeconds(System.nanoTime());
-        long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-
-        long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
-        double timeTaken = nanosecondsToSeconds(end - start);
-
-        System.out.println("Time elapsed " + timeTaken + " seconds");
-        System.out.println("Memory used " + actualMemUsed + " MB");
-        System.out.println();
-    }
-
-    private static void updateRandomDataUsersTable(Random random, Engine dbEngine, long number){
-
-        System.out.println("UPDATING");
-        
-        long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-        double start = nanosecondsToSeconds(System.nanoTime());
-
-        for (long i = 0; i < number; i++) {
-            int id = random.nextInt(10000) + 1;
-            int newAge = random.nextInt(60) + 20;
-            String updateUserQuery = "UPDATE users SET age = " + newAge + " WHERE id = " + id;
-            dbEngine.executeSQL(updateUserQuery);
-        }
-
-        double end = nanosecondsToSeconds(System.nanoTime());
-        long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-
-        long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
-        double timeTaken = nanosecondsToSeconds(end - start);
-
-        System.out.println("Time elapsed " + timeTaken + " seconds");
-        System.out.println("Memory used " + actualMemUsed + " MB");
-        System.out.println();
-    }
 
     private static void prepopulateUserTable(Random random, Engine dbEngine, long number) {
 
@@ -280,7 +233,8 @@ public class Testing {
             int age = 20 + random.nextInt(40); // Ages between 20 and 60
             String city = getRandomCity(random);
             String insertCommand = String.format("INSERT INTO users VALUES (%d, '%s', %d, '%s')", i, name, age, city);
-            dbEngine.executeSQL(insertCommand);
+            System.out.println(dbEngine.executeSQL(insertCommand));
+        
         }
 
         double end = nanosecondsToSeconds(System.nanoTime());
@@ -295,6 +249,53 @@ public class Testing {
 
     }
 
+    private static void selectFromUsers(Engine dbEngine) {
+
+        System.out.println("SELECT ALL");
+        String selectQuery = "SELECT * FROM users";
+
+        long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+        double start = nanosecondsToSeconds(System.nanoTime());
+
+        System.out.println(dbEngine.executeSQL(selectQuery));
+
+        double end = nanosecondsToSeconds(System.nanoTime());
+        long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+
+        long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
+        double timeTaken = nanosecondsToSeconds(end - start);
+
+        System.out.println("Time elapsed " + timeTaken + " seconds");
+        System.out.println("Memory used " + actualMemUsed + " MB");
+        System.out.println();
+        
+    }
+
+    private static void updateRandomDataUsersTable(Random random, Engine dbEngine, long number){
+
+        System.out.println("UPDATING");
+        
+        long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+        double start = nanosecondsToSeconds(System.nanoTime());
+
+        for (long i = 0; i < number; i++) {
+            int id = random.nextInt(10000) + 1;
+            int newAge = random.nextInt(60) + 20;
+            String updateUserQuery = "UPDATE users SET age = " + newAge + " WHERE id = " + id;
+            System.out.println(dbEngine.executeSQL(updateUserQuery));
+        }
+
+        double end = nanosecondsToSeconds(System.nanoTime());
+        long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+
+        long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
+        double timeTaken = nanosecondsToSeconds(end - start);
+
+        System.out.println("Time elapsed " + timeTaken + " seconds");
+        System.out.println("Memory used " + actualMemUsed + " MB");
+        System.out.println();
+    }
+
     private static void deleteRandomData(Engine dbEngine, long number) {
 
         System.out.println("DELETING");
@@ -304,7 +305,7 @@ public class Testing {
 
         for (long i = 0; i < number; i++) {
             String deleteUserQuery = "DELETE FROM users WHERE id = " + i;
-            dbEngine.executeSQL(deleteUserQuery);
+            System.out.println(dbEngine.executeSQL(deleteUserQuery));
         }
 
         double end = nanosecondsToSeconds(System.nanoTime());
