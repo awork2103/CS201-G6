@@ -51,43 +51,62 @@ public class EngineHashMapPlusTree extends Engine{
     }
 
     public String insert(String[] tokens) {
+        // Validate "INTO" clause
         if (!tokens[1].toUpperCase().equals("INTO")) {
             return "ERROR: Invalid INSERT syntax";
         }
-
+    
         String tableName = tokens[2];
         if (!tables.containsKey(tableName)) {
             return "ERROR: Table does not exist";
         }
-
+    
         HashMapPlusTree table = tables.get(tableName);
         List<String> columns = table.getColumns();
-
+    
+        // Parse column names between parentheses after "INSERT INTO <table>"
         String[] columnNames = queryBetweenParentheses(tokens, 3).split(",");
         int valuesIndex = Arrays.asList(tokens).indexOf("VALUES");
         if (valuesIndex == -1) {
             return "ERROR: Missing VALUES clause";
         }
-
+    
+        // Parse values between parentheses after "VALUES"
         String[] values = queryBetweenParentheses(tokens, valuesIndex + 1).split(",");
         if (columnNames.length != values.length) {
             return "ERROR: Number of columns does not match number of values";
         }
-
+    
         HashMap<String, String> entry = new HashMap<>();
         for (int i = 0; i < columnNames.length; i++) {
-            entry.put(columns.get(i), values[i].trim());
+            entry.put(columnNames[i].trim(), values[i].trim());
         }
-
+    
+        // Ensure there is an "ID" column, which acts as the unique key
         if (!entry.containsKey("id")) {
             return "ERROR: Entry must have an ID";
         }
-
+    
+        String id = entry.get("id");
+        
+        // Add the entry to the table hashmap
         table.addEntry(entry);
-
+    
+        // Add the entry to each TreeMap in `tree` based on the column name
+        for (int i = 0; i < columns.size(); i++) {
+            String column = columns.get(i);
+            String columnValue = entry.get(column);
+            
+            if (columnValue == null) {
+                return "ERROR: Missing value for column '" + column + "'";
+            }
+    
+            table.getTree(column).put(id, columnValue);
+        }
+    
         return "SUCCESS: Row inserted into " + tableName;
     }
-
+    
     public String delete(String[] tokens) {
         if (!tokens[1].toUpperCase().equals("FROM") || !tokens[3].toUpperCase().equals("WHERE")) {
             return "ERROR: Invalid DELETE syntax";
