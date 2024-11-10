@@ -46,7 +46,6 @@ public class Testing {
         }
         prepopulateUserTable(random,  dbEngine,  numberOfQueries);
         selectFromUsers(dbEngine);
-        System.out.println(dbEngine.executeSQL("SELECT * FROM users WHERE id = 1"));
         updateRandomDataUsersTable(random, dbEngine, numberOfQueries);
         selectFromUsers(dbEngine);
         deleteRandomData(dbEngine, numberOfQueries);

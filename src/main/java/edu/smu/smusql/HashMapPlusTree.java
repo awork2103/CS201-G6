@@ -24,12 +24,12 @@ public class HashMapPlusTree {
     }
 
     public void addEntry(HashMap<String, String> entry) {
-        table.put(entry.get("ID"), entry);
+        table.put(entry.get("id"), entry);
         
         // Add all column values to respective trees
         for (int i = 0; i < columns.size(); i++) {
             // tree.get(i) --> get the tree for the column
-            tree.get(i).put(entry.get("ID"), entry.get(columns.get(i)));
+            tree.get(i).put(entry.get("id"), entry.get(columns.get(i)));
         }
     }
 

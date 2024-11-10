@@ -79,7 +79,7 @@ public class EngineHashMapPlusTree extends Engine{
     
         HashMap<String, String> entry = new HashMap<>();
         for (int i = 0; i < columnNames.length; i++) {
-            entry.put(columnNames[i].trim(), values[i].trim());
+            entry.put(columns.get(i).trim(), values[i].trim());
         }
     
         // Ensure there is an "ID" column, which acts as the unique key

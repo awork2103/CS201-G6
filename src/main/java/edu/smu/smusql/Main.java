@@ -36,13 +36,14 @@ public class Main {
 
             }else if (query.equalsIgnoreCase("1tablecrud")) {
 
-                Testing.testingCRUDOnlyUserTable("10", new EngineHashMapv2(), new Random());
+                Testing.testingCRUDOnlyUserTable("million", new EngineHashMapv2(), new Random());
 
 
             // inserting into 2 tables and see if it works
 
             }else if (query.equalsIgnoreCase("2tables")) { 
-                Testing.testing2tables(new EngineHashMapv2(), new Random());
+                Testing.testing2tables(dbEngine, new Random());
+                System.out.println();
             }
 
             System.out.println(dbEngine.executeSQL(query));
