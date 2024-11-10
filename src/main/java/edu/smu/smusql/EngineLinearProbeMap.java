@@ -1,30 +1,12 @@
 package edu.smu.smusql;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-//import edu.smu.smusql.HashMapv2;    
+import java.util.*;
+/* 
+public class EngineLinearProbeMap {
 
-public class EngineHashMapv2 extends Engine{
-    //Store the SQL Tables
-    // engine for the CustomHashMapv2
-    private Map<String, CustomHashMapv2> tables = new HashMap<>();
-    private String hashingStrategy  = "DEFAULT";
-    private double loadFactor = 0.75;
-
-    public EngineHashMapv2(){
-    }
-
-    public EngineHashMapv2(String hashingStrategy){
-        this.hashingStrategy = hashingStrategy; 
-    }
-    public EngineHashMapv2(double loadFactor){
-        this.loadFactor = loadFactor; 
-    }
+    // Store the SQL Tables
+    // engine for the LinearProbeHashMap
+    private Map<String, LinearProbeHashMap> tables = new HashMap<>();
 
     public String executeSQL(String query) {
         String[] tokens = query.trim().split("\\s+");
@@ -58,7 +40,7 @@ public class EngineHashMapv2 extends Engine{
             return "ERROR: Table does not exist";
         }
 
-        CustomHashMapv2 table = tables.get(tableName); // Assuming tables is a Map<String, CustomHashMapv2>
+        LinearProbeHashMap table = tables.get(tableName); // Assuming tables is a Map<String, LinearProbeHashMap>
         List<String> columns = table.getColumns();
 
         // Parse column names and values
@@ -73,13 +55,11 @@ public class EngineHashMapv2 extends Engine{
             return "ERROR: Number of columns does not match number of values";
         }
 
-
         // Create the entry to insert
-        HashMapv2<String, String> entry = new HashMapv2<>(columnNames.length, 1, 2, "BITWISE");
+        HashMap<String, String> entry = new HashMap<>();
         for (int i = 0; i < columnNames.length; i++) {
-            entry.put(columns.get(i).trim(), values[i].trim());
+            entry.put(columns.get(i), values[i].trim());
         }
-
 
         // Ensure the ID is provided
         if (!entry.containsKey("id")) {
@@ -105,7 +85,7 @@ public class EngineHashMapv2 extends Engine{
         }
 
         // Get the table object
-        CustomHashMapv2 table = tables.get(tableName);
+        LinearProbeHashMap table = tables.get(tableName);
 
         // Get the column, operator, and value from the WHERE clause
         String column = tokens[4];
@@ -127,7 +107,7 @@ public class EngineHashMapv2 extends Engine{
 
             // Loop through the table to find matching entries
             for (String id : table.getKeys()) {
-                HashMapv2<String, String> entry = table.getEntry(id);
+                HashMap<String, String> entry = table.getEntry(id);
                 if (entry != null) {
                     String columnValue = entry.get(column);
 
@@ -160,7 +140,7 @@ public class EngineHashMapv2 extends Engine{
         }
 
         // Get the table object
-        CustomHashMapv2 table = tables.get(tableName);
+        LinearProbeHashMap table = tables.get(tableName);
         List<String> columns = table.getColumns(); // All columns in the table
 
         // Parse WHERE conditions (if present)
@@ -173,7 +153,7 @@ public class EngineHashMapv2 extends Engine{
         // Iterate through the table entries (each entry represents a row)
         for (String key : table.getKeys()) {
             // Get the entry (row) by ID
-            HashMapv2<String, String> entry = table.getEntry(key);
+            Map<String, String> entry = table.getEntry(key);
             if (entry == null) {
                 continue;
             }
@@ -194,66 +174,67 @@ public class EngineHashMapv2 extends Engine{
     }
 
     public String update(String[] tokens) {
-        // Check SQL syntax: UPDATE <table> SET <column1> = <value1>, ... WHERE <conditions>
+        // Check SQL syntax: UPDATE <table> SET <column1> = <value1>, ... WHERE
+        // <conditions>
         if (!tokens[2].toUpperCase().equals("SET")) {
             return "ERROR: Invalid UPDATE syntax";
         }
-    
+
         // Get the table name
         String tableName = tokens[1];
         if (!tables.containsKey(tableName)) {
             return "ERROR: Table does not exist";
         }
-    
+
         // Get the table object
-        CustomHashMapv2 table = tables.get(tableName);
-    
+        LinearProbeHashMap table = tables.get(tableName);
+
         // Parse the SET clause (the list of columns and values to update)
         int setIndex = Arrays.asList(tokens).indexOf("SET");
         int whereIndex = Arrays.asList(tokens).indexOf("WHERE");
-    
+
         // Ensure WHERE clause exists
         if (whereIndex == -1) {
             return "ERROR: Missing WHERE clause";
         }
-    
+
         // Parse the column-value pairs for the SET clause
         String[] setClauses = Arrays.copyOfRange(tokens, setIndex + 1, whereIndex);
         Map<String, String> updates = new HashMap<>();
-    
+
         // Extract column-value pairs (e.g., column1 = value1, column2 = value2)
         for (int i = 0; i < setClauses.length; i += 3) {
             String column = setClauses[i];
             String operator = setClauses[i + 1];
             String value = setClauses[i + 2].replace(",", ""); // Remove any trailing commas
-    
+
             if (!operator.equals("=")) {
                 return "ERROR: Invalid operator in SET clause";
             }
-    
+
             // Ensure the column exists in the table
             if (!table.getColumns().contains(column)) {
                 return "ERROR: Column " + column + " does not exist in table " + tableName;
             }
-    
+
             // Add the update to the map
             updates.put(column, value);
         }
-    
+
         // Parse WHERE conditions, including inequalities
         List<String[]> whereConditions = parseWhereConditions(tokens);
-    
+
         // Update the matching entries in the table
         int updatedCount = 0;
         for (String key : table.getKeys()) {
-            HashMapv2<String, String> entry = table.getEntry(key);
+            Map<String, String> entry = table.getEntry(key);
             if (entry == null) {
                 continue;
             }
-    
+
             // Evaluate WHERE conditions for this entry
             boolean match = evaluateWhereConditions(entry, whereConditions);
-    
+
             // If the entry matches the WHERE conditions, apply the updates
             if (match) {
                 for (Map.Entry<String, String> update : updates.entrySet()) {
@@ -262,10 +243,9 @@ public class EngineHashMapv2 extends Engine{
                 updatedCount++;
             }
         }
-    
+
         return "SUCCESS: " + updatedCount + " row(s) updated in " + tableName;
     }
-    
 
     public String create(String[] tokens) {
 
@@ -289,15 +269,15 @@ public class EngineHashMapv2 extends Engine{
         // Trim each column name to avoid spaces around them
         columns.replaceAll(String::trim);
 
-        CustomHashMapv2 newTable = new CustomHashMapv2(tableName, columns, hashingStrategy, loadFactor);
+        LinearProbeHashMap newTable = new LinearProbeHashMap(tableName, columns);
         tables.put(tableName, newTable);
 
         return "Table " + tableName + " created successfully with columns: " + columns;
     }
 
     /*
-     *  HELPER METHODS
-     */
+     * HELPER METHODS
+    *//* 
     // Helper method to extract content inside parentheses
     private String queryBetweenParentheses(String[] tokens, int startIndex) {
         StringBuilder result = new StringBuilder();
@@ -315,13 +295,13 @@ public class EngineHashMapv2 extends Engine{
             for (int i = 5; i < tokens.length; i++) {
                 if (tokens[i].equalsIgnoreCase("AND") || tokens[i].equalsIgnoreCase("OR")) {
                     // Add AND/OR conditions
-                    whereClauseConditions.add(new String[]{tokens[i].toUpperCase(), null, null, null});
+                    whereClauseConditions.add(new String[] { tokens[i].toUpperCase(), null, null, null });
                 } else if (isOperator(tokens[i])) {
                     // Add condition with operator (column, operator, value)
                     String column = tokens[i - 1];
                     String operator = tokens[i];
                     String value = tokens[i + 1];
-                    whereClauseConditions.add(new String[]{null, column, operator, value});
+                    whereClauseConditions.add(new String[] { null, column, operator, value });
                     i += 1; // Skip the value since it has been processed
                 }
             }
@@ -387,7 +367,7 @@ public class EngineHashMapv2 extends Engine{
     }
 
     // Method to evaluate where conditions
-    private boolean evaluateWhereConditions(HashMapv2<String, String> row, List<String[]> conditions) {
+    private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
         boolean overallMatch = true;
         boolean nextConditionShouldMatch = true; // Default behavior for AND
 
@@ -411,5 +391,6 @@ public class EngineHashMapv2 extends Engine{
         }
 
         return overallMatch;
-    }
-}
+    } 
+
+}*/

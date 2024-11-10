@@ -35,6 +35,10 @@ public class LinearProbeHashMap<K, V> {
         }
     }
 
+    public Set<K> keySet(){
+        return null;
+    }
+
     // Bitwise Hashing
     private int customBitwiseHashCode(K key) {
         // Typecast Key into a String (since ID is a string)

@@ -11,8 +11,24 @@ public class CustomHashMapv2 {
         this.columns = columns;
         // HashMapv2(int capacity, float loadFactor, int hashMultiplier, String hashingStrategy)
         // Types of hashing strategies: DEFAULT, BITWISE, POLYNOMIAL, CYCLIC, ADDITIVE
-        this.table = new HashMapv2<String, HashMapv2<String, String>>(16, 0.75, 31, "ADDITIVE");
+        this.table = new HashMapv2<String, HashMapv2<String, String>>(16, 0.75, 31, "BITWISE");
     }  
+
+    public CustomHashMapv2(String tableName, List<String> columns,String hashingStrategy) {
+        this.tableName = tableName;
+        this.columns = columns;
+        // HashMapv2(int capacity, float loadFactor, int hashMultiplier, String hashingStrategy)
+        // Types of hashing strategies: DEFAULT, BITWISE, POLYNOMIAL, CYCLIC, ADDITIVE
+        this.table = new HashMapv2<String, HashMapv2<String, String>>(16, 0.75, 31, hashingStrategy);
+    }
+    public CustomHashMapv2(String tableName, List<String> columns,String hashingStrategy, double loadFactor) {
+        this.tableName = tableName;
+        this.columns = columns;
+        // HashMapv2(int capacity, float loadFactor, int hashMultiplier, String hashingStrategy)
+        // Types of hashing strategies: DEFAULT, BITWISE, POLYNOMIAL, CYCLIC, ADDITIVE
+        this.table = new HashMapv2<String, HashMapv2<String, String>>(16, loadFactor, 31, hashingStrategy);
+    }  
+
 
     public void addEntry(HashMapv2<String, String> entry) {
         table.put(entry.get("id"), entry);
