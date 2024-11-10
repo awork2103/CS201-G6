@@ -45,6 +45,11 @@ class HashMapv2<K, V> {
         return false;
     }
 
+    // Default Hashing (for Eclipse JDK)
+    private int defaultHashCode(K key) {
+        return key.hashCode();
+    }
+
     // Bitwise Hashing
     private int customBitwiseHashCode(K key) {
         // Typecast Key into a String (since ID is a string)
@@ -113,6 +118,8 @@ class HashMapv2<K, V> {
                 return customCyclicHashCode(key);
             case "ADDITIVE":
                 return customAdditiveHashCode(key);
+            case "DEFAULT":
+                return defaultHashCode(key);
             default:
                 throw new IllegalArgumentException("Unknown hashing strategy");
         }
