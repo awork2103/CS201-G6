@@ -36,15 +36,16 @@ public class Main {
 
             }else if (query.equalsIgnoreCase("Engines")) {
 
-                long numberOfQueries = 5000;
+                long numberOfQueries = 100000;
 
                 System.out.println("Default");
                 Testing.testingCRUDOnlyUserTable(new Engine(), new Random(), numberOfQueries);
-                System.out.println("Custom HashingCode : BITWISE");
+                System.out.println("Custom HashingCode : DEFAULT");
                 Testing.testingCRUDOnlyUserTable(new EngineHashMapv2(), new Random(), numberOfQueries);
                 System.out.println("HashMap but stored in trees");
                 Testing.testingCRUDOnlyUserTable(new EngineHashMapPlusTree(), new Random(), numberOfQueries);
-                //Testing.testingCRUDOnlyUserTable(new EngineHashMapv2(), new Random(), 10000);
+                System.out.println();
+                //Testing.testingCRUDOnlyUserTable(new EngineLinearProbeMap(), new Random(), numberOfQueries);
                 break;
 
 
@@ -53,6 +54,7 @@ public class Main {
             }else if (query.equalsIgnoreCase("2tables")) { 
                 Testing.testing2tables(dbEngine, new Random());
                 System.out.println();
+
             }else if (query.equalsIgnoreCase("hashstrats")) { 
 
                 long numberOfQueries = 5000;
@@ -69,14 +71,14 @@ public class Main {
                 Testing.testingCRUDOnlyUserTable(new EngineHashMapv2("CYCLIC"), new Random(), numberOfQueries);
 
             }else if (query.equalsIgnoreCase("load")) { 
-                long numberOfQueries = 5000;
+                long numberOfQueries = 10000;
 
                 System.out.println("LOADFACTOR : 0.1");
                 Testing.testingCRUDOnlyUserTable(new EngineHashMapv2(0.1), new Random(), numberOfQueries);
                 System.out.println("LOADFACTOR : 0.5");
                 Testing.testingCRUDOnlyUserTable(new EngineHashMapv2(0.5), new Random(), numberOfQueries);
-                System.out.println("LOADFACTOR : 0.9");
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapv2(0.9), new Random(), numberOfQueries);
+                System.out.println("LOADFACTOR : 2");
+                Testing.testingCRUDOnlyUserTable(new EngineHashMapv2(2), new Random(), numberOfQueries);
 
             }
 

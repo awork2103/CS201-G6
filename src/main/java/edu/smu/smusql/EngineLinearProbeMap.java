@@ -1,9 +1,9 @@
 package edu.smu.smusql;
 
 import java.util.*;
-/* 
-public class EngineLinearProbeMap {
 
+public class EngineLinearProbeMap extends Engine{
+/* 
     // Store the SQL Tables
     // engine for the LinearProbeHashMap
     private Map<String, LinearProbeHashMap> tables = new HashMap<>();
@@ -391,6 +391,6 @@ public class EngineLinearProbeMap {
         }
 
         return overallMatch;
-    } 
+    } */
 
-}*/
+}
