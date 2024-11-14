@@ -11,7 +11,7 @@ public class LinearProbeHashMap<K, V> {
     private int size;
     private static final int DEFAULT_CAPACITY = 11;
 
-    // @SuppressWarnings("unchecked")
+     @SuppressWarnings("unchecked")
     public LinearProbeHashMap(int capacity, double loadFactor, int hashMultiplier, String hashingStrategy) {
         this.loadFactor = loadFactor;
         this.hashMultiplier = hashMultiplier;
@@ -35,8 +35,14 @@ public class LinearProbeHashMap<K, V> {
         }
     }
 
-    public Set<K> keySet(){
-        return null;
+    public Set<K> keySet() {
+        Set<K> keys = new HashSet<>();
+        for (Entry<K, V> entry : table) {
+            if (entry != null && entry.key != null) {
+                keys.add(entry.key);
+            }
+        }
+        return keys;
     }
 
     // Bitwise Hashing
@@ -184,7 +190,7 @@ public class LinearProbeHashMap<K, V> {
         return null;
     }
 
-    // @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     private void resize() {
         // Create a new table with double the size
         Entry<K, V>[] oldTable = table;

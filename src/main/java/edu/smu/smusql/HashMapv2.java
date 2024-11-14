@@ -13,6 +13,7 @@ class HashMapv2<K, V> {
     private int size;
 
     // Set an initial capacity and loadFactor
+    @SuppressWarnings("unchecked")
     public HashMapv2(int capacity, double loadFactor, int hashMultiplier, String hashingStrategy) {
         this.loadFactor = loadFactor;
         this.hashMultiplier = hashMultiplier;
@@ -202,6 +203,7 @@ class HashMapv2<K, V> {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private void resize() {
         LinkedList<Entry<K, V>>[] oldBuckets = buckets;
         buckets = new LinkedList[buckets.length * 2];

@@ -11,6 +11,7 @@ public class DoubleHashMap<K, V> {
     private int size;
     private static final int DEFAULT_CAPACITY = 11;
 
+    @SuppressWarnings("unchecked")
     public DoubleHashMap(int capacity, double loadFactor, int hashMultiplier, String hashingStrategy) {
         this.loadFactor = loadFactor;
         this.hashMultiplier = hashMultiplier;
@@ -150,6 +151,7 @@ public class DoubleHashMap<K, V> {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private void resize() {
         Entry<K, V>[] oldTable = table;
         table = new Entry[oldTable.length * 2];
@@ -168,5 +170,15 @@ public class DoubleHashMap<K, V> {
 
     public boolean isEmpty() {
         return size == 0;
+    }
+
+    public Set<K> keySet() {
+        Set<K> keys = new HashSet<>();
+        for (Entry<K, V> entry : table) {
+            if (entry != null && entry.key != null) {
+                keys.add(entry.key);
+            }
+        }
+        return keys;
     }
 }
