@@ -13,14 +13,13 @@ import java.util.List;
  */
 public class Parser {
 
-    public void parseInsert(String[] tokens) {
-        String tableName = tokens[2]; // The name of the table to be inserted into.
-        String valueList = queryBetweenParentheses(tokens, 4); // Get values list between parentheses
-        List<String> values = Arrays.asList(valueList.split(",")); // These are the values in the row to be inserted.
-    }
+    // public List<String[]> parseInsert(String[] tokens) {
+    //     String tableName = tokens[2]; // The name of the table to be inserted into.
+    //     String valueList = queryBetweenParentheses(tokens, 4); // Get values list between parentheses
+    //     List<String> values = Arrays.asList(valueList.split(",")); // These are the values in the row to be inserted.
+    // }
 
-    public void parseDelete(String[] tokens) {
-        String tableName = tokens[2]; // The name of the table to be deleted from.
+    public List<String[]> parseDelete(String[] tokens) {
 
         List<String[]> whereClauseConditions = new ArrayList<>(); // Array for storing conditions from the where clause.
 
@@ -40,13 +39,14 @@ public class Parser {
                 }
             }
         }
+        return whereClauseConditions;
     }
 
-    public void parseUpdate(String[] tokens){
-        String tableName = tokens[1]; // name of the table to be updated
+    public List<String[]> parseUpdate(String[] tokens){
+        // String tableName = tokens[1]; // name of the table to be updated
 
-        String setColumn = tokens[3]; // column to be updated
-        String newValue = tokens[5]; // new value for above column
+        // String setColumn = tokens[3]; // column to be updated
+        // String newValue = tokens[5]; // new value for above column
 
         // Initialize whereClauseConditions list
         List<String[]> whereClauseConditions = new ArrayList<>();
@@ -67,6 +67,7 @@ public class Parser {
                 }
             }
         }
+        return whereClauseConditions;
     }
 
     // Helper method to extract content inside parentheses
