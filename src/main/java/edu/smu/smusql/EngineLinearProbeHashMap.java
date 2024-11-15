@@ -229,6 +229,7 @@ public class EngineLinearProbeHashMap extends Engine {
         }
 
         String columnList = queryBetweenParentheses(tokens, 3);
+        
         if (columnList == null || columnList.isEmpty()) {
             return "ERROR: No columns specified";
         }

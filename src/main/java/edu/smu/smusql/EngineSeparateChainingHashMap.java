@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 //import edu.smu.smusql.SeparateChainingHashMap;    
+import java.util.stream.IntStream;
 
 public class EngineSeparateChainingHashMap extends Engine{
     //Store the SQL Tables
@@ -295,7 +296,7 @@ public class EngineSeparateChainingHashMap extends Engine{
         return "Table " + tableName + " created successfully with columns: " + columns;
     }
 
-    /*
+   /*
      *  HELPER METHODS
      */
     // Helper method to extract content inside parentheses
@@ -387,29 +388,92 @@ public class EngineSeparateChainingHashMap extends Engine{
     }
 
     // Method to evaluate where conditions
-    private boolean evaluateWhereConditions(SeparateChainingHashMap<String, String> row, List<String[]> conditions) {
-        boolean overallMatch = true;
-        boolean nextConditionShouldMatch = true; // Default behavior for AND
-
+    private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
+        boolean result = false;  // Default result should be false
+        boolean currentCondition = true; // Tracks the result of the current condition
+    
+        // Track if an OR operator was encountered
+        boolean previousConditionWasOR = false;
+    
         for (String[] condition : conditions) {
-            if (condition[0] != null) { // AND/OR operator
-                nextConditionShouldMatch = condition[0].equals("AND");
+            if (condition[0] != null) {  // Logical operator (AND/OR)
+                if (condition[0].equals("AND")) {
+                    // Apply AND logic: Combine currentCondition with result
+                    result = result && currentCondition;
+                    currentCondition = true; // Reset for the next condition
+                } else if (condition[0].equals("OR")) {
+                    // Apply OR logic: If the previous condition was OR, use OR
+                    if (previousConditionWasOR) {
+                        result = result || currentCondition;
+                    } else {
+                        result = currentCondition;
+                    }
+                    previousConditionWasOR = true;  // Mark that we encountered an OR
+                    currentCondition = true;  // Reset for the next condition
+                }
             } else {
-                // Parse column, operator, and value
+                // Evaluate individual condition (column, operator, value)
                 String column = condition[1];
                 String operator = condition[2];
                 String value = condition[3];
+    
+                currentCondition = evaluateCondition(row.get(column), operator, value);
+            }
+        }
+    
+        // After finishing evaluation, combine the final condition with result
+        result = result || currentCondition;  // If it's OR, the last condition may still apply
+    
+        return result;
+    }
 
-                boolean currentMatch = evaluateCondition(row.get(column), operator, value);
+    public List<String[]> parseUpdate(String[] tokens) {
+        List<String[]> whereClauseConditions = new ArrayList<>();
+    
+        int whereIndex = IntStream.range(0, tokens.length)
+                          .filter(i -> tokens[i].equalsIgnoreCase("WHERE"))
+                          .findFirst()
+                          .orElse(-1);
 
-                if (nextConditionShouldMatch) {
-                    overallMatch = overallMatch && currentMatch;
-                } else {
-                    overallMatch = overallMatch || currentMatch;
+        if (whereIndex != -1) {
+            for (int i = whereIndex + 1; i < tokens.length; i++) {
+                if (tokens[i].equalsIgnoreCase("AND") || tokens[i].equalsIgnoreCase("OR")) {
+                    // Logical operators
+                    whereClauseConditions.add(new String[]{tokens[i].toUpperCase(), null, null, null});
+                } else if (isOperator(tokens[i])) {
+                    // Conditions (column, operator, value)
+                    String column = tokens[i - 1];
+                    String operator = tokens[i];
+                    String value = tokens[i + 1];
+                    whereClauseConditions.add(new String[]{null, column, operator, value});
+                    i++; // Skip the value since it has been processed
                 }
             }
         }
+    
+        return whereClauseConditions;
+    }
 
-        return overallMatch;
+    public List<String[]> parseDelete(String[] tokens) {
+
+        List<String[]> whereClauseConditions = new ArrayList<>(); // Array for storing conditions from the where clause.
+
+        // Parse WHERE clause conditions
+        if (tokens.length > 3 && tokens[3].toUpperCase().equals("WHERE")) {
+            for (int i = 4; i < tokens.length; i++) {
+                if (tokens[i].toUpperCase().equals("AND") || tokens[i].toUpperCase().equals("OR")) {
+                    // Add AND/OR conditions
+                    whereClauseConditions.add(new String[] {tokens[i].toUpperCase(), null, null, null});
+                } else if (isOperator(tokens[i])) {
+                    // Add condition with operator (column, operator, value)
+                    String column = tokens[i - 1];
+                    String operator = tokens[i];
+                    String value = tokens[i + 1];
+                    whereClauseConditions.add(new String[] {null, column, operator, value});
+                    i += 1; // Skip the value since it has been processed
+                }
+            }
+        }
+        return whereClauseConditions;
     }
 }
