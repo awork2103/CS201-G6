@@ -3,10 +3,10 @@ package edu.smu.smusql;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class EngineLinearProbeHashMap extends Engine{
+public class EngineLinearProbeHashMap extends Engine {
 
-    // Store the SQL Tables
-    private Map<String, LinearProbeHashMap<String, Map<String, String>>> tables = new HashMap<>();
+    // Store the SQL Tables using CustomHashMapLinear
+    private Map<String, CustomHashMapLinear> tables = new HashMap<>();
 
     @Override
     public String executeSQL(String query) {
@@ -29,7 +29,6 @@ public class EngineLinearProbeHashMap extends Engine{
         }
     }
 
-    @Override
     public String insert(String[] tokens) {
         // Basic syntax check
         if (!tokens[1].toUpperCase().equals("INTO")) {
@@ -42,8 +41,8 @@ public class EngineLinearProbeHashMap extends Engine{
             return "ERROR: Table does not exist";
         }
 
-        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
-        List<String> columns = getColumns(table);
+        CustomHashMapLinear table = tables.get(tableName); // Assuming tables is a Map<String, CustomHashMap>
+        List<String> columns = table.getColumns();
 
         // Parse column names and values
         String[] columnNames = queryBetweenParentheses(tokens, 3).split(","); // Get column names between ( )
@@ -58,7 +57,7 @@ public class EngineLinearProbeHashMap extends Engine{
         }
 
         // Create the entry to insert
-        Map<String, String> entry = new HashMap<>();
+        LinearProbeHashMap<String, String> entry = new LinearProbeHashMap<>();
         for (int i = 0; i < columnNames.length; i++) {
             entry.put(columns.get(i), values[i].trim());
         }
@@ -69,53 +68,13 @@ public class EngineLinearProbeHashMap extends Engine{
         }
 
         // Insert the entry into the table
-        table.put(entry.get("id"), entry);
+        table.addEntry(entry);
 
         return "SUCCESS: Row inserted into " + tableName;
     }
 
-    public String delete(String[] tokens) {
-        // Validate syntax
-        if (!tokens[1].toUpperCase().equals("FROM") || tokens.length < 4 || !tokens[3].toUpperCase().equals("WHERE")) {
-            return "ERROR: Invalid DELETE syntax";
-        }
 
-        String tableName = tokens[2];
-        if (!tables.containsKey(tableName)) {
-            return "ERROR: Table does not exist";
-        }
-
-        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
-
-        // Parse WHERE conditions using parseDelete
-        List<String[]> whereConditions = parseDelete(tokens);
-
-        if (whereConditions.isEmpty()) {
-            return "ERROR: Invalid or unsupported WHERE conditions";
-        }
-
-        Set<String> idsToDelete = new HashSet<>();
-
-        // Iterate over rows
-        for (String key : table.keySet()) {
-            Map<String, String> entry = table.get(key);
-            if (entry == null) continue;
-
-            boolean match = evaluateWhereConditions(entry, whereConditions);
-
-            if (match) {
-                idsToDelete.add(key);
-            }
-        }
-
-        // Delete matching rows
-        for (String id : idsToDelete) {
-            table.remove(id);
-        }
-
-        return "SUCCESS: " + idsToDelete.size() + " row(s) deleted from " + tableName;
-    }
-
+    @Override
     public String select(String[] tokens) {
         if (!tokens[1].equals("*") || !tokens[2].toUpperCase().equals("FROM")) {
             return "ERROR: Invalid SELECT syntax";
@@ -126,19 +85,19 @@ public class EngineLinearProbeHashMap extends Engine{
             return "ERROR: Table does not exist";
         }
 
-        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
-        List<String> columns = getColumns(table);
-
+        CustomHashMapLinear table = tables.get(tableName);
+        List<String> columns = table.getColumns();
         List<String[]> whereConditions = parseWhereConditions(tokens);
 
         StringBuilder result = new StringBuilder();
         result.append(String.join("\t", columns)).append("\n");
 
-        for (String key : table.keySet()) {
-            Map<String, String> entry = table.get(key);
+        for (String key : table.getKeys()) {
+            LinearProbeHashMap<String, String> entry = table.getEntry(key);
             if (entry == null) continue;
 
-            boolean match = evaluateWhereConditions(entry, whereConditions);
+            // Cast the entry to Map<String, String>
+            boolean match = evaluateWhereConditions((Map<String, String>) entry, whereConditions);
 
             if (match) {
                 for (String column : columns) {
@@ -151,6 +110,47 @@ public class EngineLinearProbeHashMap extends Engine{
         return result.toString();
     }
 
+    @Override
+    public String delete(String[] tokens) {
+        if (!tokens[1].toUpperCase().equals("FROM") || tokens.length < 4 || !tokens[3].toUpperCase().equals("WHERE")) {
+            return "ERROR: Invalid DELETE syntax";
+        }
+
+        String tableName = tokens[2];
+        if (!tables.containsKey(tableName)) {
+            return "ERROR: Table does not exist";
+        }
+
+        CustomHashMapLinear table = tables.get(tableName);
+        List<String[]> whereConditions = parseDelete(tokens);
+
+        if (whereConditions.isEmpty()) {
+            return "ERROR: Invalid or unsupported WHERE conditions";
+        }
+
+        Set<String> idsToDelete = new HashSet<>();
+
+        // Iterate over rows
+        for (String key : table.getKeys()) {
+            LinearProbeHashMap<String, String> entry = table.getEntry(key);
+            if (entry == null) continue;
+
+            boolean match = evaluateWhereConditions((Map<String, String>) entry, whereConditions);
+
+            if (match) {
+                idsToDelete.add(key);
+            }
+        }
+
+        // Delete matching rows
+        for (String id : idsToDelete) {
+            table.deleteEntry(id);
+        }
+
+        return "SUCCESS: " + idsToDelete.size() + " row(s) deleted from " + tableName;
+    }
+
+    @Override
     public String update(String[] tokens) {
         if (!tokens[2].toUpperCase().equals("SET")) {
             return "ERROR: Invalid UPDATE syntax";
@@ -161,7 +161,7 @@ public class EngineLinearProbeHashMap extends Engine{
             return "ERROR: Table does not exist";
         }
 
-        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
+        CustomHashMapLinear table = tables.get(tableName);
 
         int setIndex = IntStream.range(0, tokens.length)
                                 .filter(i -> tokens[i].equalsIgnoreCase("SET"))
@@ -189,7 +189,7 @@ public class EngineLinearProbeHashMap extends Engine{
                 return "ERROR: Invalid operator in SET clause";
             }
 
-            if (!getColumns(table).contains(column)) {
+            if (!table.getColumns().contains(column)) {
                 return "ERROR: Column " + column + " does not exist in table " + tableName;
             }
 
@@ -200,11 +200,11 @@ public class EngineLinearProbeHashMap extends Engine{
 
         int updatedCount = 0;
 
-        for (String key : table.keySet()) {
-            Map<String, String> entry = table.get(key);
+        for (String key : table.getKeys()) {
+            LinearProbeHashMap<String, String> entry = table.getEntry(key);
             if (entry == null) continue;
 
-            boolean match = evaluateWhereConditions(entry, whereConditions);
+            boolean match = evaluateWhereConditions((Map<String, String>) entry, whereConditions);
 
             if (match) {
                 for (Map.Entry<String, String> update : updates.entrySet()) {
@@ -217,6 +217,7 @@ public class EngineLinearProbeHashMap extends Engine{
         return "SUCCESS: " + updatedCount + " row(s) updated in " + tableName;
     }
 
+    @Override
     public String create(String[] tokens) {
         if (!tokens[1].equalsIgnoreCase("TABLE")) {
             return "ERROR: Invalid CREATE TABLE syntax";
@@ -235,13 +236,12 @@ public class EngineLinearProbeHashMap extends Engine{
         List<String> columns = Arrays.asList(columnList.split(","));
         columns.replaceAll(String::trim);
 
-        LinearProbeHashMap<String, Map<String, String>> newTable = new LinearProbeHashMap<>();
+        CustomHashMapLinear newTable = new CustomHashMapLinear(tableName, columns);
         tables.put(tableName, newTable);
 
         return "Table " + tableName + " created successfully with columns: " + columns;
     }
 
-    // Helper methods like queryBetweenParentheses, evaluateWhereConditions, etc., go here
     /*
      *  HELPER METHODS
      */
@@ -255,6 +255,7 @@ public class EngineLinearProbeHashMap extends Engine{
     }
 
     // Helper method too parse WHERE clauses
+    @Override
     public List<String[]> parseWhereConditions(String[] tokens) {
         List<String[]> whereClauseConditions = new ArrayList<>();
 
@@ -277,6 +278,63 @@ public class EngineLinearProbeHashMap extends Engine{
     }
 
     // Helper method to evaluate a single condition
+    private boolean evaluateCondition(String columnValue, String operator, String value) {
+        if (columnValue == null) {
+            return false;
+        }
+
+        // Compare strings as numbers if possible
+        boolean isNumeric = isNumeric(columnValue) && isNumeric(value);
+        if (isNumeric) {
+            double columnNumber = Double.parseDouble(columnValue);
+            double valueNumber = Double.parseDouble(value);
+
+            switch (operator) {
+                case "=":
+                    return columnNumber == valueNumber;
+                case ">":
+                    return columnNumber > valueNumber;
+                case "<":
+                    return columnNumber < valueNumber;
+                case ">=":
+                    return columnNumber >= valueNumber;
+                case "<=":
+                    return columnNumber <= valueNumber;
+            }
+        } else {
+            switch (operator) {
+                case "=":
+                    return columnValue.equals(value);
+                case ">":
+                    return columnValue.compareTo(value) > 0;
+                case "<":
+                    return columnValue.compareTo(value) < 0;
+                case ">=":
+                    return columnValue.compareTo(value) >= 0;
+                case "<=":
+                    return columnValue.compareTo(value) <= 0;
+            }
+        }
+
+        return false;
+    }
+
+    // Helper method to determine if a string is an operator
+    private boolean isOperator(String token) {
+        return token.equals("=") || token.equals(">") || token.equals("<") || token.equals(">=") || token.equals("<=");
+    }
+
+    // Helper method to determine if a string is numeric
+    private boolean isNumeric(String str) {
+        try {
+            Double.valueOf(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    // Method to evaluate where conditions
     private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
         boolean result = false;  // Default result should be false
         boolean currentCondition = true; // Tracks the result of the current condition
@@ -316,48 +374,7 @@ public class EngineLinearProbeHashMap extends Engine{
         return result;
     }
 
-    // Helper method to determine if a string is an operator
-    private boolean isOperator(String token) {
-        return token.equals("=") || token.equals(">") || token.equals("<") || token.equals(">=") || token.equals("<=");
-    }
-
-    // Helper method to determine if a string is numeric
-    private boolean isNumeric(String str) {
-        try {
-            Double.parseDouble(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    // Method to evaluate where conditions
-    private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
-        boolean overallMatch = true;
-        boolean nextConditionShouldMatch = true; // Default behavior for AND
-
-        for (String[] condition : conditions) {
-            if (condition[0] != null) { // AND/OR operator
-                nextConditionShouldMatch = condition[0].equals("AND");
-            } else {
-                // Parse column, operator, and value
-                String column = condition[1];
-                String operator = condition[2];
-                String value = condition[3];
-
-                boolean currentMatch = evaluateCondition(row.get(column), operator, value);
-
-                if (nextConditionShouldMatch) {
-                    overallMatch = overallMatch && currentMatch;
-                } else {
-                    overallMatch = overallMatch || currentMatch;
-                }
-            }
-        }
-
-        return overallMatch;
-    }
-
+    @Override
     public List<String[]> parseUpdate(String[] tokens) {
         List<String[]> whereClauseConditions = new ArrayList<>();
     
@@ -385,6 +402,7 @@ public class EngineLinearProbeHashMap extends Engine{
         return whereClauseConditions;
     }
 
+    @Override
     public List<String[]> parseDelete(String[] tokens) {
 
         List<String[]> whereClauseConditions = new ArrayList<>(); // Array for storing conditions from the where clause.
@@ -407,4 +425,5 @@ public class EngineLinearProbeHashMap extends Engine{
         }
         return whereClauseConditions;
     }
+
 }
