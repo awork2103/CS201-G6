@@ -7,12 +7,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-//import edu.smu.smusql.HashMapv2;    
+//import edu.smu.smusql.SeparateChainingHashMap;    
 
 public class EngineHashMapv2 extends Engine{
     //Store the SQL Tables
-    // engine for the CustomHashMapv2
-    private Map<String, CustomHashMapv2> tables = new HashMap<>();
+    // engine for the CustomHashMapChaining
+    private Map<String, CustomHashMapChaining> tables = new HashMap<>();
     private String hashingStrategy  = "DEFAULT";
     private double loadFactor = 0.75;
 
@@ -58,7 +58,7 @@ public class EngineHashMapv2 extends Engine{
             return "ERROR: Table does not exist";
         }
 
-        CustomHashMapv2 table = tables.get(tableName); // Assuming tables is a Map<String, CustomHashMapv2>
+        CustomHashMapChaining table = tables.get(tableName); // Assuming tables is a Map<String, CustomHashMapChaining>
         List<String> columns = table.getColumns();
 
         // Parse column names and values
@@ -75,7 +75,7 @@ public class EngineHashMapv2 extends Engine{
 
 
         // Create the entry to insert
-        HashMapv2<String, String> entry = new HashMapv2<>(columnNames.length, 1, 2, "BITWISE");
+        SeparateChainingHashMap<String, String> entry = new SeparateChainingHashMap<>(columnNames.length, 1, 2, "BITWISE");
         for (int i = 0; i < columnNames.length; i++) {
             entry.put(columns.get(i).trim(), values[i].trim());
         }
@@ -105,7 +105,7 @@ public class EngineHashMapv2 extends Engine{
         }
 
         // Get the table object
-        CustomHashMapv2 table = tables.get(tableName);
+        CustomHashMapChaining table = tables.get(tableName);
 
         // Get the column, operator, and value from the WHERE clause
         String column = tokens[4];
@@ -127,7 +127,7 @@ public class EngineHashMapv2 extends Engine{
 
             // Loop through the table to find matching entries
             for (String id : table.getKeys()) {
-                HashMapv2<String, String> entry = table.getEntry(id);
+                SeparateChainingHashMap<String, String> entry = table.getEntry(id);
                 if (entry != null) {
                     String columnValue = entry.get(column);
 
@@ -160,7 +160,7 @@ public class EngineHashMapv2 extends Engine{
         }
 
         // Get the table object
-        CustomHashMapv2 table = tables.get(tableName);
+        CustomHashMapChaining table = tables.get(tableName);
         List<String> columns = table.getColumns(); // All columns in the table
 
         // Parse WHERE conditions (if present)
@@ -173,7 +173,7 @@ public class EngineHashMapv2 extends Engine{
         // Iterate through the table entries (each entry represents a row)
         for (String key : table.getKeys()) {
             // Get the entry (row) by ID
-            HashMapv2<String, String> entry = table.getEntry(key);
+            SeparateChainingHashMap<String, String> entry = table.getEntry(key);
             if (entry == null) {
                 continue;
             }
@@ -206,7 +206,7 @@ public class EngineHashMapv2 extends Engine{
         }
     
         // Get the table object
-        CustomHashMapv2 table = tables.get(tableName);
+        CustomHashMapChaining table = tables.get(tableName);
     
         // Parse the SET clause (the list of columns and values to update)
         int setIndex = Arrays.asList(tokens).indexOf("SET");
@@ -246,7 +246,7 @@ public class EngineHashMapv2 extends Engine{
         // Update the matching entries in the table
         int updatedCount = 0;
         for (String key : table.getKeys()) {
-            HashMapv2<String, String> entry = table.getEntry(key);
+            SeparateChainingHashMap<String, String> entry = table.getEntry(key);
             if (entry == null) {
                 continue;
             }
@@ -289,7 +289,7 @@ public class EngineHashMapv2 extends Engine{
         // Trim each column name to avoid spaces around them
         columns.replaceAll(String::trim);
 
-        CustomHashMapv2 newTable = new CustomHashMapv2(tableName, columns, hashingStrategy, loadFactor);
+        CustomHashMapChaining newTable = new CustomHashMapChaining(tableName, columns, hashingStrategy, loadFactor);
         tables.put(tableName, newTable);
 
         return "Table " + tableName + " created successfully with columns: " + columns;
@@ -387,7 +387,7 @@ public class EngineHashMapv2 extends Engine{
     }
 
     // Method to evaluate where conditions
-    private boolean evaluateWhereConditions(HashMapv2<String, String> row, List<String[]> conditions) {
+    private boolean evaluateWhereConditions(SeparateChainingHashMap<String, String> row, List<String[]> conditions) {
         boolean overallMatch = true;
         boolean nextConditionShouldMatch = true; // Default behavior for AND
 

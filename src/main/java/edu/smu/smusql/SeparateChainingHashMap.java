@@ -3,7 +3,7 @@ package edu.smu.smusql;
 import java.util.*;
 
 // Class is meant to replace HashMap in both CustomHashMap and HashMapPlusTree
-class HashMapv2<K, V> {
+class SeparateChainingHashMap<K, V> {
 
     private double loadFactor;
     private int hashMultiplier;
@@ -14,7 +14,7 @@ class HashMapv2<K, V> {
 
     // Set an initial capacity and loadFactor
     @SuppressWarnings("unchecked")
-    public HashMapv2(int capacity, double loadFactor, int hashMultiplier, String hashingStrategy) {
+    public SeparateChainingHashMap(int capacity, double loadFactor, int hashMultiplier, String hashingStrategy) {
         this.loadFactor = loadFactor;
         this.hashMultiplier = hashMultiplier;
         this.hashingStrategy = hashingStrategy;
