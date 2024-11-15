@@ -277,45 +277,43 @@ public class EngineLinearProbeHashMap extends Engine{
     }
 
     // Helper method to evaluate a single condition
-    private boolean evaluateCondition(String columnValue, String operator, String value) {
-        if (columnValue == null) {
-            return false;
-        }
-
-        // Compare strings as numbers if possible
-        boolean isNumeric = isNumeric(columnValue) && isNumeric(value);
-        if (isNumeric) {
-            double columnNumber = Double.parseDouble(columnValue);
-            double valueNumber = Double.parseDouble(value);
-
-            switch (operator) {
-                case "=":
-                    return columnNumber == valueNumber;
-                case ">":
-                    return columnNumber > valueNumber;
-                case "<":
-                    return columnNumber < valueNumber;
-                case ">=":
-                    return columnNumber >= valueNumber;
-                case "<=":
-                    return columnNumber <= valueNumber;
-            }
-        } else {
-            switch (operator) {
-                case "=":
-                    return columnValue.equals(value);
-                case ">":
-                    return columnValue.compareTo(value) > 0;
-                case "<":
-                    return columnValue.compareTo(value) < 0;
-                case ">=":
-                    return columnValue.compareTo(value) >= 0;
-                case "<=":
-                    return columnValue.compareTo(value) <= 0;
+    private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
+        boolean result = false;  // Default result should be false
+        boolean currentCondition = true; // Tracks the result of the current condition
+    
+        // Track if an OR operator was encountered
+        boolean previousConditionWasOR = false;
+    
+        for (String[] condition : conditions) {
+            if (condition[0] != null) {  // Logical operator (AND/OR)
+                if (condition[0].equals("AND")) {
+                    // Apply AND logic: Combine currentCondition with result
+                    result = result && currentCondition;
+                    currentCondition = true; // Reset for the next condition
+                } else if (condition[0].equals("OR")) {
+                    // Apply OR logic: If the previous condition was OR, use OR
+                    if (previousConditionWasOR) {
+                        result = result || currentCondition;
+                    } else {
+                        result = currentCondition;
+                    }
+                    previousConditionWasOR = true;  // Mark that we encountered an OR
+                    currentCondition = true;  // Reset for the next condition
+                }
+            } else {
+                // Evaluate individual condition (column, operator, value)
+                String column = condition[1];
+                String operator = condition[2];
+                String value = condition[3];
+    
+                currentCondition = evaluateCondition(row.get(column), operator, value);
             }
         }
-
-        return false;
+    
+        // After finishing evaluation, combine the final condition with result
+        result = result || currentCondition;  // If it's OR, the last condition may still apply
+    
+        return result;
     }
 
     // Helper method to determine if a string is an operator

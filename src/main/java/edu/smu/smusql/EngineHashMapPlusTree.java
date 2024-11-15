@@ -347,20 +347,30 @@ public class EngineHashMapPlusTree extends Engine{
 
     // Method to evaluate where conditions
     private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
-        boolean result = true; // Default behavior for "AND"
+        boolean result = false;  // Default result should be false
         boolean currentCondition = true; // Tracks the result of the current condition
     
+        // Track if an OR operator was encountered
+        boolean previousConditionWasOR = false;
+    
         for (String[] condition : conditions) {
-            if (condition[0] != null) { // Logical operator (AND/OR)
+            if (condition[0] != null) {  // Logical operator (AND/OR)
                 if (condition[0].equals("AND")) {
+                    // Apply AND logic: Combine currentCondition with result
                     result = result && currentCondition;
                     currentCondition = true; // Reset for the next condition
                 } else if (condition[0].equals("OR")) {
-                    result = result || currentCondition;
-                    currentCondition = true; // Reset for the next condition
+                    // Apply OR logic: If the previous condition was OR, use OR
+                    if (previousConditionWasOR) {
+                        result = result || currentCondition;
+                    } else {
+                        result = currentCondition;
+                    }
+                    previousConditionWasOR = true;  // Mark that we encountered an OR
+                    currentCondition = true;  // Reset for the next condition
                 }
             } else {
-                // Evaluate individual condition
+                // Evaluate individual condition (column, operator, value)
                 String column = condition[1];
                 String operator = condition[2];
                 String value = condition[3];
@@ -369,8 +379,8 @@ public class EngineHashMapPlusTree extends Engine{
             }
         }
     
-        // Combine the last condition
-        result = result && currentCondition;
+        // After finishing evaluation, combine the final condition with result
+        result = result || currentCondition;  // If it's OR, the last condition may still apply
     
         return result;
     }
