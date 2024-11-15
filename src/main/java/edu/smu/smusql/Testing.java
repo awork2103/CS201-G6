@@ -1,7 +1,7 @@
 package edu.smu.smusql;
 import java.util.*;
 import edu.smu.smusql.Engine;
-import edu.smu.smusql.EngineHashMapv2;
+import edu.smu.smusql.EngineSeparateChainingHashMap;
 import edu.smu.smusql.EngineHashMapPlusTree;
 
 public class Testing {

@@ -41,7 +41,7 @@ public class Main {
                 System.out.println("Default");
                 Testing.testingCRUDOnlyUserTable(new Engine(), new Random(), numberOfQueries);
                 System.out.println("Custom HashingCode : DEFAULT");
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapv2(), new Random(), numberOfQueries);
+                Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(), new Random(), numberOfQueries);
                 System.out.println("HashMap but stored in trees");
                 Testing.testingCRUDOnlyUserTable(new EngineHashMapPlusTree(), new Random(), numberOfQueries);
                 System.out.println();
@@ -62,23 +62,23 @@ public class Main {
                 System.out.println("Default");
                 Testing.testingCRUDOnlyUserTable(new Engine(), new Random(), numberOfQueries);
                 System.out.println("Custom HashingCode : BITWISE");
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapv2( "BITWISE"), new Random(), numberOfQueries);
+                Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap( "BITWISE"), new Random(), numberOfQueries);
                 System.out.println("Custom HashingCode : ADDITIVE");
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapv2("ADDITIVE"), new Random(), numberOfQueries);
+                Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap("ADDITIVE"), new Random(), numberOfQueries);
                 System.out.println("Custom HashingCode : POLYNOMIAL");
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapv2("POLYNOMIAL"), new Random(), numberOfQueries);
+                Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap("POLYNOMIAL"), new Random(), numberOfQueries);
                 System.out.println("Custom HashingCode : CYCLIC");
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapv2("CYCLIC"), new Random(), numberOfQueries);
+                Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap("CYCLIC"), new Random(), numberOfQueries);
 
             }else if (query.equalsIgnoreCase("load")) { 
                 long numberOfQueries = 10000;
 
                 System.out.println("LOADFACTOR : 0.1");
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapv2(0.1), new Random(), numberOfQueries);
+                Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.1), new Random(), numberOfQueries);
                 System.out.println("LOADFACTOR : 0.5");
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapv2(0.5), new Random(), numberOfQueries);
+                Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.5), new Random(), numberOfQueries);
                 System.out.println("LOADFACTOR : 2");
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapv2(2), new Random(), numberOfQueries);
+                Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(2), new Random(), numberOfQueries);
 
             }
 

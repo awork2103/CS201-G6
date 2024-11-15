@@ -9,20 +9,20 @@ import java.util.Map;
 import java.util.Set;
 //import edu.smu.smusql.SeparateChainingHashMap;    
 
-public class EngineHashMapv2 extends Engine{
+public class EngineSeparateChainingHashMap extends Engine{
     //Store the SQL Tables
     // engine for the CustomHashMapChaining
     private Map<String, CustomHashMapChaining> tables = new HashMap<>();
     private String hashingStrategy  = "DEFAULT";
     private double loadFactor = 0.75;
 
-    public EngineHashMapv2(){
+    public EngineSeparateChainingHashMap(){
     }
 
-    public EngineHashMapv2(String hashingStrategy){
+    public EngineSeparateChainingHashMap(String hashingStrategy){
         this.hashingStrategy = hashingStrategy; 
     }
-    public EngineHashMapv2(double loadFactor){
+    public EngineSeparateChainingHashMap(double loadFactor){
         this.loadFactor = loadFactor; 
     }
 
