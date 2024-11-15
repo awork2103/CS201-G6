@@ -1,17 +1,14 @@
 package edu.smu.smusql;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.IntStream;
 
-public class EngineLinearProbeHashMap extends Engine {
+public class EngineLinearProbeHashMap extends Engine{
 
+    // Store the SQL Tables
     private Map<String, LinearProbeHashMap<String, Map<String, String>>> tables = new HashMap<>();
 
+    @Override
     public String executeSQL(String query) {
         String[] tokens = query.trim().split("\\s+");
         String command = tokens[0].toUpperCase();
@@ -30,6 +27,194 @@ public class EngineLinearProbeHashMap extends Engine {
             default:
                 return "ERROR: Unknown command";
         }
+    }
+
+    @Override
+    public String insert(String[] tokens) {
+        // Basic syntax check
+        if (!tokens[1].toUpperCase().equals("INTO")) {
+            return "ERROR: Invalid INSERT syntax";
+        }
+
+        // Get Table name and ensure it exists
+        String tableName = tokens[2];
+        if (!tables.containsKey(tableName)) {
+            return "ERROR: Table does not exist";
+        }
+
+        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
+        List<String> columns = getColumns(table);
+
+        // Parse column names and values
+        String[] columnNames = queryBetweenParentheses(tokens, 3).split(","); // Get column names between ( )
+        int valuesIndex = Arrays.asList(tokens).indexOf("VALUES");
+        if (valuesIndex == -1) {
+            return "ERROR: Missing VALUES clause";
+        }
+
+        String[] values = queryBetweenParentheses(tokens, valuesIndex + 1).split(","); // Get values between ( )
+        if (columnNames.length != values.length) {
+            return "ERROR: Number of columns does not match number of values";
+        }
+
+        // Create the entry to insert
+        Map<String, String> entry = new HashMap<>();
+        for (int i = 0; i < columnNames.length; i++) {
+            entry.put(columns.get(i), values[i].trim());
+        }
+
+        // Ensure the ID is provided
+        if (!entry.containsKey("id")) {
+            return "ERROR: Entry must have an ID";
+        }
+
+        // Insert the entry into the table
+        table.put(entry.get("id"), entry);
+
+        return "SUCCESS: Row inserted into " + tableName;
+    }
+
+    public String delete(String[] tokens) {
+        // Validate syntax
+        if (!tokens[1].toUpperCase().equals("FROM") || tokens.length < 4 || !tokens[3].toUpperCase().equals("WHERE")) {
+            return "ERROR: Invalid DELETE syntax";
+        }
+
+        String tableName = tokens[2];
+        if (!tables.containsKey(tableName)) {
+            return "ERROR: Table does not exist";
+        }
+
+        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
+
+        // Parse WHERE conditions using parseDelete
+        List<String[]> whereConditions = parseDelete(tokens);
+
+        if (whereConditions.isEmpty()) {
+            return "ERROR: Invalid or unsupported WHERE conditions";
+        }
+
+        Set<String> idsToDelete = new HashSet<>();
+
+        // Iterate over rows
+        for (String key : table.keySet()) {
+            Map<String, String> entry = table.get(key);
+            if (entry == null) continue;
+
+            boolean match = evaluateWhereConditions(entry, whereConditions);
+
+            if (match) {
+                idsToDelete.add(key);
+            }
+        }
+
+        // Delete matching rows
+        for (String id : idsToDelete) {
+            table.remove(id);
+        }
+
+        return "SUCCESS: " + idsToDelete.size() + " row(s) deleted from " + tableName;
+    }
+
+    public String select(String[] tokens) {
+        if (!tokens[1].equals("*") || !tokens[2].toUpperCase().equals("FROM")) {
+            return "ERROR: Invalid SELECT syntax";
+        }
+
+        String tableName = tokens[3];
+        if (!tables.containsKey(tableName)) {
+            return "ERROR: Table does not exist";
+        }
+
+        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
+        List<String> columns = getColumns(table);
+
+        List<String[]> whereConditions = parseWhereConditions(tokens);
+
+        StringBuilder result = new StringBuilder();
+        result.append(String.join("\t", columns)).append("\n");
+
+        for (String key : table.keySet()) {
+            Map<String, String> entry = table.get(key);
+            if (entry == null) continue;
+
+            boolean match = evaluateWhereConditions(entry, whereConditions);
+
+            if (match) {
+                for (String column : columns) {
+                    result.append(entry.getOrDefault(column, "NULL")).append("\t");
+                }
+                result.append("\n");
+            }
+        }
+
+        return result.toString();
+    }
+
+    public String update(String[] tokens) {
+        if (!tokens[2].toUpperCase().equals("SET")) {
+            return "ERROR: Invalid UPDATE syntax";
+        }
+
+        String tableName = tokens[1];
+        if (!tables.containsKey(tableName)) {
+            return "ERROR: Table does not exist";
+        }
+
+        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
+
+        int setIndex = IntStream.range(0, tokens.length)
+                                .filter(i -> tokens[i].equalsIgnoreCase("SET"))
+                                .findFirst()
+                                .orElse(-1);
+
+        int whereIndex = IntStream.range(0, tokens.length)
+                                  .filter(i -> tokens[i].equalsIgnoreCase("WHERE"))
+                                  .findFirst()
+                                  .orElse(-1);
+
+        if (whereIndex == -1) {
+            return "ERROR: Missing WHERE clause";
+        }
+
+        String[] setClauses = Arrays.copyOfRange(tokens, setIndex + 1, whereIndex);
+        Map<String, String> updates = new HashMap<>();
+
+        for (int i = 0; i < setClauses.length; i += 3) {
+            String column = setClauses[i];
+            String operator = setClauses[i + 1];
+            String value = setClauses[i + 2].replace(",", "");
+
+            if (!operator.equals("=")) {
+                return "ERROR: Invalid operator in SET clause";
+            }
+
+            if (!getColumns(table).contains(column)) {
+                return "ERROR: Column " + column + " does not exist in table " + tableName;
+            }
+
+            updates.put(column, value);
+        }
+
+        List<String[]> whereConditions = parseUpdate(tokens);
+
+        int updatedCount = 0;
+
+        for (String key : table.keySet()) {
+            Map<String, String> entry = table.get(key);
+            if (entry == null) continue;
+
+            boolean match = evaluateWhereConditions(entry, whereConditions);
+
+            if (match) {
+                for (Map.Entry<String, String> update : updates.entrySet()) {
+                    entry.put(update.getKey(), update.getValue());
+                }
+                updatedCount++;
+            }
+        }
+
+        return "SUCCESS: " + updatedCount + " row(s) updated in " + tableName;
     }
 
     public String create(String[] tokens) {
@@ -56,165 +241,11 @@ public class EngineLinearProbeHashMap extends Engine {
         return "Table " + tableName + " created successfully with columns: " + columns;
     }
 
-    public String insert(String[] tokens) {
-        if (!tokens[1].equalsIgnoreCase("INTO")) {
-            return "ERROR: Invalid INSERT syntax";
-        }
-
-        String tableName = tokens[2];
-        if (!tables.containsKey(tableName)) {
-            return "ERROR: Table does not exist";
-        }
-
-        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
-
-        String[] columnNames = queryBetweenParentheses(tokens, 3).split(",");
-        int valuesIndex = Arrays.asList(tokens).indexOf("VALUES");
-        if (valuesIndex == -1) {
-            return "ERROR: Missing VALUES clause";
-        }
-
-        String[] values = queryBetweenParentheses(tokens, valuesIndex + 1).split(",");
-        if (columnNames.length != values.length) {
-            return "ERROR: Number of columns does not match number of values";
-        }
-
-        Map<String, String> entry = new HashMap<>();
-        for (int i = 0; i < columnNames.length; i++) {
-            entry.put(columnNames[i].trim(), values[i].trim());
-        }
-
-        if (!entry.containsKey("id")) {
-            return "ERROR: Entry must have an ID";
-        }
-
-        String id = entry.get("id");
-        table.put(id, entry);
-
-        return "SUCCESS: Row inserted into " + tableName;
-    }
-
-    public String select(String[] tokens) {
-        if (!tokens[1].equals("*") || !tokens[2].equalsIgnoreCase("FROM")) {
-            return "ERROR: Invalid SELECT syntax";
-        }
-
-        String tableName = tokens[3];
-        if (!tables.containsKey(tableName)) {
-            return "ERROR: Table does not exist";
-        }
-
-        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
-        List<String[]> whereConditions = parseWhereConditions(tokens);
-
-        StringBuilder result = new StringBuilder();
-        Set<String> columns = table.keySet();
-
-        result.append(String.join("\t", columns)).append("\n");
-
-        for (String key : table.keySet()) {
-            Map<String, String> entry = table.get(key);
-            if (entry == null) continue;
-
-            boolean match = evaluateWhereConditions(entry, whereConditions);
-
-            if (match) {
-                for (String column : columns) {
-                    result.append(entry.getOrDefault(column, "NULL")).append("\t");
-                }
-                result.append("\n");
-            }
-        }
-
-        return result.toString();
-    }
-
-    public String update(String[] tokens) {
-        if (!tokens[2].equalsIgnoreCase("SET")) {
-            return "ERROR: Invalid UPDATE syntax";
-        }
-
-        String tableName = tokens[1];
-        if (!tables.containsKey(tableName)) {
-            return "ERROR: Table does not exist";
-        }
-
-        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
-
-        int setIndex = Arrays.asList(tokens).indexOf("SET");
-        int whereIndex = Arrays.asList(tokens).indexOf("WHERE");
-
-        if (whereIndex == -1) {
-            return "ERROR: Missing WHERE clause";
-        }
-
-        String[] setClauses = Arrays.copyOfRange(tokens, setIndex + 1, whereIndex);
-        Map<String, String> updates = new HashMap<>();
-
-        for (int i = 0; i < setClauses.length; i += 3) {
-            String column = setClauses[i];
-            String operator = setClauses[i + 1];
-            String value = setClauses[i + 2].replace(",", "");
-
-            if (!operator.equals("=")) {
-                return "ERROR: Invalid operator in SET clause";
-            }
-
-            updates.put(column, value);
-        }
-
-        List<String[]> whereConditions = parseWhereConditions(tokens);
-
-        int updatedCount = 0;
-        for (String key : table.keySet()) {
-            Map<String, String> entry = table.get(key);
-            if (entry == null) continue;
-
-            boolean match = evaluateWhereConditions(entry, whereConditions);
-
-            if (match) {
-                for (Map.Entry<String, String> update : updates.entrySet()) {
-                    entry.put(update.getKey(), update.getValue());
-                }
-                updatedCount++;
-            }
-        }
-
-        return "SUCCESS: " + updatedCount + " row(s) updated in " + tableName;
-    }
-
-    public String delete(String[] tokens) {
-        if (!tokens[1].equalsIgnoreCase("FROM") || !tokens[3].equalsIgnoreCase("WHERE")) {
-            return "ERROR: Invalid DELETE syntax";
-        }
-
-        String tableName = tokens[2];
-        if (!tables.containsKey(tableName)) {
-            return "ERROR: Table does not exist";
-        }
-
-        LinearProbeHashMap<String, Map<String, String>> table = tables.get(tableName);
-        List<String[]> whereConditions = parseWhereConditions(tokens);
-
-        int deletedCount = 0;
-        for (String key : new HashSet<>(table.keySet())) {
-            Map<String, String> entry = table.get(key);
-            if (entry == null) continue;
-
-            boolean match = evaluateWhereConditions(entry, whereConditions);
-
-            if (match) {
-                table.remove(key);
-                deletedCount++;
-            }
-        }
-
-        return "SUCCESS: " + deletedCount + " row(s) deleted from " + tableName;
-    }
-
-    // Helper methods are the same as in the previous version
-    // queryBetweenParentheses, parseWhereConditions, evaluateCondition, etc.
-
+    // Helper methods like queryBetweenParentheses, evaluateWhereConditions, etc., go here
+    /*
+     *  HELPER METHODS
+     */
+    // Helper method to extract content inside parentheses
     private String queryBetweenParentheses(String[] tokens, int startIndex) {
         StringBuilder result = new StringBuilder();
         for (int i = startIndex; i < tokens.length; i++) {
@@ -329,8 +360,53 @@ public class EngineLinearProbeHashMap extends Engine {
         return overallMatch;
     }
 
-    // Helper method to access table data from HashMapPlusTree
-    private Map<String, HashMap<String, String>> getTableData(HashMapPlusTree table) {
-        return table.getTable();
+    public List<String[]> parseUpdate(String[] tokens) {
+        List<String[]> whereClauseConditions = new ArrayList<>();
+    
+        int whereIndex = IntStream.range(0, tokens.length)
+                          .filter(i -> tokens[i].equalsIgnoreCase("WHERE"))
+                          .findFirst()
+                          .orElse(-1);
+
+        if (whereIndex != -1) {
+            for (int i = whereIndex + 1; i < tokens.length; i++) {
+                if (tokens[i].equalsIgnoreCase("AND") || tokens[i].equalsIgnoreCase("OR")) {
+                    // Logical operators
+                    whereClauseConditions.add(new String[]{tokens[i].toUpperCase(), null, null, null});
+                } else if (isOperator(tokens[i])) {
+                    // Conditions (column, operator, value)
+                    String column = tokens[i - 1];
+                    String operator = tokens[i];
+                    String value = tokens[i + 1];
+                    whereClauseConditions.add(new String[]{null, column, operator, value});
+                    i++; // Skip the value since it has been processed
+                }
+            }
+        }
+    
+        return whereClauseConditions;
+    }
+
+    public List<String[]> parseDelete(String[] tokens) {
+
+        List<String[]> whereClauseConditions = new ArrayList<>(); // Array for storing conditions from the where clause.
+
+        // Parse WHERE clause conditions
+        if (tokens.length > 3 && tokens[3].toUpperCase().equals("WHERE")) {
+            for (int i = 4; i < tokens.length; i++) {
+                if (tokens[i].toUpperCase().equals("AND") || tokens[i].toUpperCase().equals("OR")) {
+                    // Add AND/OR conditions
+                    whereClauseConditions.add(new String[] {tokens[i].toUpperCase(), null, null, null});
+                } else if (isOperator(tokens[i])) {
+                    // Add condition with operator (column, operator, value)
+                    String column = tokens[i - 1];
+                    String operator = tokens[i];
+                    String value = tokens[i + 1];
+                    whereClauseConditions.add(new String[] {null, column, operator, value});
+                    i += 1; // Skip the value since it has been processed
+                }
+            }
+        }
+        return whereClauseConditions;
     }
 }
