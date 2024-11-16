@@ -7,7 +7,7 @@ public class EngineLinearProbeHashMap extends Engine {
 
     // Store the SQL Tables using CustomHashMapLinear
     private Map<String, CustomHashMapLinear> tables = new HashMap<>();
-    private double loadFactor;
+    private double loadFactor = 0.75;
 
     public EngineLinearProbeHashMap(double loadFactor){
         this.loadFactor = loadFactor; 
@@ -242,7 +242,7 @@ public class EngineLinearProbeHashMap extends Engine {
         List<String> columns = Arrays.asList(columnList.split(","));
         columns.replaceAll(String::trim);
 
-        CustomHashMapLinear newTable = new CustomHashMapLinear(tableName, columns);
+        CustomHashMapLinear newTable = new CustomHashMapLinear(tableName, columns, loadFactor);
         tables.put(tableName, newTable);
 
         return "Table " + tableName + " created successfully with columns: " + columns;

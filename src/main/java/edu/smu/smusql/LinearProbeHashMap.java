@@ -25,7 +25,7 @@ public class LinearProbeHashMap<K, V> {
     }
 
     public LinearProbeHashMap(double loadFactor) {
-        this(DEFAULT_CAPACITY, loadFactor, 31, "POLYNOMIAL");
+        this(DEFAULT_CAPACITY, loadFactor, 31 , "DEFAULT");
     }
 
     // Entry to store key-value pairs
@@ -117,9 +117,15 @@ public class LinearProbeHashMap<K, V> {
                 return customCyclicHashCode(key);
             case "ADDITIVE":
                 return customAdditiveHashCode(key);
+            case "DEFAULT":
+                return defaultHashCode(key);
             default:
                 throw new IllegalArgumentException("Unknown hashing strategy");
         }
+    }
+
+    private int defaultHashCode(K key) {
+        return key.hashCode();
     }
 
     private int findSlot(K key) {
