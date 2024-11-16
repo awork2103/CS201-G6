@@ -164,9 +164,9 @@ public class Testing {
     }
 
     private static void selectFromUsersWithWhereOR(Engine dbEngine){
-        System.out.println("SELECT WITH WHERE age > 40 OR city = 'New York'");
+        System.out.println("SELECT WITH OR WHERE age > 40 OR id = 1");
 
-        String selectQuery = "SELECT * FROM users WHERE age > 40 OR city = 'New York'"; // 
+        String selectQuery = "SELECT * FROM users WHERE age > 40 OR id = 1"; // 
 
         long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
         double start = nanosecondsToSeconds(System.nanoTime());
@@ -185,9 +185,9 @@ public class Testing {
     }
 
     private static void selectFromUsersWithWhereAND(Engine dbEngine){
-        System.out.println("SELECT WITH WHERE age < 50 AND city = 'Austin'");
+        System.out.println("SELECT WITH WHERE age > 40 AND city = 'Austin'");
 
-        String selectQuery = "SELECT name FROM users WHERE age > 40 AND city = 'Austin'"; // 
+        String selectQuery = "SELECT * FROM users WHERE age > 40 AND city = 'Austin'"; // 
 
         long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
         double start = nanosecondsToSeconds(System.nanoTime());
@@ -214,7 +214,7 @@ public class Testing {
     }
 
     private static void deleteWithWhere(Engine dbEngine){
-        System.out.println("dELETE WITH WHERE age < 40 AND city = 'Denver'");
+        System.out.println("DELETE WITH WHERE age < 40 AND city = 'Denver'");
 
         String deleteUserQuery = "DELETE FROM users WHERE city = 'Denver' AND age < 40";
         dbEngine.executeSQL(deleteUserQuery);

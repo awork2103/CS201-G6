@@ -63,7 +63,7 @@ public class Results {
     public void testHashMapWithTreesInsertionComparison(){
         EngineHashMapPlusTree treeEngine = new EngineHashMapPlusTree();
         Engine normalEngine = new Engine();
-        long numberOfInsertions = 50000;
+        long numberOfInsertions = 10000;
 
         treeEngine.executeSQL("CREATE TABLE users (id, name, age, city)");
         normalEngine.executeSQL("CREATE TABLE users (id, name, age, city)");
@@ -119,7 +119,7 @@ public class Results {
     }
 
     public void crudTestingLoadFactorsChaining(){
-        long numberOfQueries = 5000;
+        long numberOfQueries = 1000;
 
         TestResult chaining01Result;
         TestResult chaining05Result;
@@ -190,17 +190,17 @@ public class Results {
         Results testingobj = new Results();
 
         //Tests the meomory and time of inserting between hashtrees storing the data vs hashmaps
-        //testingobj.testHashMapWithTreesInsertionComparison();
+        testingobj.testHashMapWithTreesInsertionComparison();
 
         //Tests the performance of each function
         //testingobj.testHashFunction();
 
         //Tests the performace of crud between the hashtrees vs hashmaps
-        //testingobj.crudTestingTreeMapAndNormal();
+        testingobj.crudTestingTreeMapAndNormal();
 
-        //testingobj.crudTestingLoadFactorsChaining();
+        // testingobj.crudTestingLoadFactorsChaining();
 
-        testingobj.crudTestingLoadLinear();
+        // testingobj.crudTestingLoadLinear();
 
     
         

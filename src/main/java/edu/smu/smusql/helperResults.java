@@ -8,7 +8,7 @@ public class helperResults {
     private static final long nano = 1000000000;
 
     public static double nanosecondsToSeconds(double nanoSeconds){
-        return nanoSeconds * nano;
+        return nanoSeconds / nano;
     }
 
     public static double getTime(){
@@ -31,7 +31,7 @@ public class helperResults {
         TestResult results = new TestResult();
 
         for ( int i = 0 ; i < numberOfRuns; i++){
-            prepopulateUserTable(random,  dbEngine,  numberOfQueries);
+            prepopulateUserTable(random,  dbEngine,  numberOfQueries, results);
             //System.gc(); 
             updateRandomDataUsersTable(random, dbEngine, numberOfQueries,results);
             //System.gc(); 
@@ -67,7 +67,7 @@ public class helperResults {
 
     }
 
-    public static TestResult prepopulateUserTable(Random random, Engine dbEngine, long number, TestResult result) {
+    public static void prepopulateUserTable(Random random, Engine dbEngine, long number, TestResult result) {
 
         long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
         double start = System.nanoTime();
@@ -89,9 +89,7 @@ public class helperResults {
         long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
         double timeTaken = nanosecondsToSeconds(end - start);
         
-        result.updateSelect(timeTaken, actualMemUsed);
-
-        return result;
+        result.updateInsert(timeTaken, actualMemUsed);
 
     }
 
@@ -120,7 +118,7 @@ public class helperResults {
 
     private static void selectFromUsersWithWhere(Engine dbEngine, TestResult result){
 
-        String selectQuery = "SELECT * FROM users WHERE age > 40 AND city = 'New York'";
+        String selectQuery = "SELECT * FROM users WHERE age > 40";
 
         long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
         double start = nanosecondsToSeconds(System.nanoTime());

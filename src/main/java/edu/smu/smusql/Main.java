@@ -38,13 +38,13 @@ public class Main {
 
 
             }else if (query.equalsIgnoreCase("testfunc")) {
-                // System.out.println("Default hashmap engine");
-                // System.out.println();
-                // Testing.testingCRUDOnlyUserTable(new Engine(), new Random(), 10);
-
-                System.out.println("Hashmap and tree engine");
+                System.out.println("Default hashmap engine");
                 System.out.println();
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapPlusTree(), new Random(), 10);
+                Testing.testingCRUDOnlyUserTable(new Engine(), new Random(), 10);
+
+                // System.out.println("Hashmap and tree engine");
+                // System.out.println();
+                // Testing.testingCRUDOnlyUserTable(new EngineHashMapPlusTree(), new Random(), 10);
 
                 // System.out.println("Seperate chaining engine");
                 // System.out.println();
