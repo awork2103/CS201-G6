@@ -136,30 +136,38 @@ public class EngineHashMapPlusTree extends Engine{
         // Parse WHERE conditions using parseDelete method
         List<String[]> whereConditions = parseDelete(tokens); 
     
-        if (whereConditions.isEmpty()) {
-            return "ERROR: Invalid or unsupported WHERE conditions";
-        }
+        // if (whereConditions.isEmpty()) {
+        //     return "ERROR: Invalid or unsupported WHERE conditions";
+        // }
     
-        Set<String> idsToDelete = new HashSet<>();
+        // Set<String> idsToDelete = new HashSet<>();
     
-        // Iterate over the rows to evaluate conditions
-        for (String key : table.getTable().keySet()) {
-            Map<String, String> entry = table.getEntry(key);
-            if (entry == null) continue;
+        // // Iterate over the rows to evaluate conditions
+        // for (String key : table.getTable().keySet()) {
+        //     Map<String, String> entry = table.getEntry(key);
+        //     if (entry == null) continue;
     
-            boolean match = evaluateWhereConditions(entry, whereConditions);
+        //     boolean match = evaluateWhereConditions(entry, whereConditions);
     
-            if (match) {
-                idsToDelete.add(key);
-            }
-        }
+        //     if (match) {
+        //         idsToDelete.add(key);
+        //     }
+        // }
     
-        // Delete matching rows
-        for (String id : idsToDelete) {
+        // // Delete matching rows
+        // for (String id : idsToDelete) {
+        //     table.deleteEntry(id);
+        // }
+
+        int deletedIds = 0;
+        Set<String> ids = evaluateWhereConditions(table, whereConditions);
+
+        for(String id : ids) {
             table.deleteEntry(id);
+            deletedIds++;
         }
-    
-        return idsToDelete.size() + " entries deleted.";
+
+        return deletedIds + " entries deleted.";
     }
     
 
@@ -181,18 +189,23 @@ public class EngineHashMapPlusTree extends Engine{
         StringBuilder result = new StringBuilder();
         result.append(String.join("\t", columns)).append("\n");
 
-        for (String key : table.getTable().keySet()) {
-            Map<String, String> entry = table.getEntry(key);
-            if (entry == null) continue;
+        // for (String key : table.getTable().keySet()) {
+        //     Map<String, String> entry = table.getEntry(key);
+        //     if (entry == null) continue;
 
-            boolean match = evaluateWhereConditions(entry, whereConditions);
+        //     boolean match = evaluateWhereConditions(entry, whereConditions);
 
-            if (match) {
-                for (String column : columns) {
-                    result.append(entry.getOrDefault(column, "NULL")).append("\t");
-                }
-                result.append("\n");
-            }
+        //     if (match) {
+        //         for (String column : columns) {
+        //             result.append(entry.getOrDefault(column, "NULL")).append("\t");
+        //         }
+        //         result.append("\n");
+        //     }
+        // }
+
+        Set<String> ids = evaluateWhereConditions(table, whereConditions);
+        for (String id : ids) {
+            table.getEntry(id).forEach((key, value) -> result.append(value).append("\t"));
         }
 
         return result.toString();
@@ -249,21 +262,39 @@ public class EngineHashMapPlusTree extends Engine{
     
         int updatedCount = 0;
     
-        // Iterate over rows
-        for (String key : table.getTable().keySet()) {
-            Map<String, String> entry = table.getEntry(key);
-            if (entry == null) continue;
+        // // Iterate over rows
+        // for (String key : table.getTable().keySet()) {
+        //     Map<String, String> entry = table.getEntry(key);
+        //     if (entry == null) continue;
     
-            boolean match = evaluateWhereConditions(entry, whereConditions);
+        //     boolean match = evaluateWhereConditions(entry, whereConditions);
     
-            if (match) {
-                for (Map.Entry<String, String> update : updates.entrySet()) {
-                    entry.put(update.getKey(), update.getValue());
-                }
-                updatedCount++;
+        //     if (match) {
+        //         for (Map.Entry<String, String> update : updates.entrySet()) {
+        //             entry.put(update.getKey(), update.getValue());
+        //         }
+        //         updatedCount++;
+        //     }
+        // }
+    
+        // return "SUCCESS: " + updatedCount + " row(s) updated in " + tableName;
+
+        Set<String> ids = evaluateWhereConditions(table, whereConditions);
+
+        // Update a row
+        for (String id : ids) {
+            // Get HashMap of columns
+            Map<String, String> entry = table.getEntry(id);
+            if (entry == null)
+                continue;
+
+            // Put in updated values into the column tree
+            for (Map.Entry<String, String> update : updates.entrySet()) {
+                entry.put(update.getKey(), update.getValue());
             }
+            updatedCount++;
         }
-    
+
         return "SUCCESS: " + updatedCount + " row(s) updated in " + tableName;
     }
     
@@ -302,38 +333,38 @@ public class EngineHashMapPlusTree extends Engine{
     }
 
     // Helper method to evaluate a single condition
-    private boolean evaluateCondition(String columnValue, String operator, String value) {
-        if (columnValue == null) {
-            return false;
-        }
+    // private boolean evaluateCondition(String columnValue, String operator, String value) {
+    //     if (columnValue == null) {
+    //         return false;
+    //     }
     
-        // Check if both the column value and the comparison value are numeric
-        boolean isNumeric = isNumeric(columnValue) && isNumeric(value);
+    //     // Check if both the column value and the comparison value are numeric
+    //     boolean isNumeric = isNumeric(columnValue) && isNumeric(value);
     
-        if (isNumeric) {
-            double columnNumber = Double.parseDouble(columnValue);
-            double valueNumber = Double.parseDouble(value);
+    //     if (isNumeric) {
+    //         double columnNumber = Double.parseDouble(columnValue);
+    //         double valueNumber = Double.parseDouble(value);
     
-            switch (operator) {
-                case "=": return columnNumber == valueNumber;
-                case ">": return columnNumber > valueNumber;
-                case "<": return columnNumber < valueNumber;
-                case ">=": return columnNumber >= valueNumber;
-                case "<=": return columnNumber <= valueNumber;
-                default: return false;
-            }
-        } else {
-            // Fallback to string comparison
-            switch (operator) {
-                case "=": return columnValue.equals(value);
-                case ">": return columnValue.compareTo(value) > 0;
-                case "<": return columnValue.compareTo(value) < 0;
-                case ">=": return columnValue.compareTo(value) >= 0;
-                case "<=": return columnValue.compareTo(value) <= 0;
-                default: return false;
-            }
-        }
-    }
+    //         switch (operator) {
+    //             case "=": return columnNumber == valueNumber;
+    //             case ">": return columnNumber > valueNumber;
+    //             case "<": return columnNumber < valueNumber;
+    //             case ">=": return columnNumber >= valueNumber;
+    //             case "<=": return columnNumber <= valueNumber;
+    //             default: return false;
+    //         }
+    //     } else {
+    //         // Fallback to string comparison
+    //         switch (operator) {
+    //             case "=": return columnValue.equals(value);
+    //             case ">": return columnValue.compareTo(value) > 0;
+    //             case "<": return columnValue.compareTo(value) < 0;
+    //             case ">=": return columnValue.compareTo(value) >= 0;
+    //             case "<=": return columnValue.compareTo(value) <= 0;
+    //             default: return false;
+    //         }
+    //     }
+    // }
     
 
     // Helper method to determine if a string is an operator
@@ -352,30 +383,26 @@ public class EngineHashMapPlusTree extends Engine{
     }
 
     // Method to evaluate where conditions
-    private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
-        boolean overallMatch = true;
-        boolean nextConditionShouldMatch = true; // Default behavior for AND
+    private Set<String> evaluateWhereConditions(HashMapPlusTree map, List<String[]> conditions) {
 
+        Set<String> ids = new HashSet<>();
+        boolean nextConditionShouldMatch = true; // If true == AND operator, if false == OR operator
         for (String[] condition : conditions) {
-            if (condition[0] != null) { // AND/OR operator
-                nextConditionShouldMatch = condition[0].equals("AND");
-            } else {
-                // Parse column, operator, and value
-                String column = condition[1];
-                String operator = condition[2];
-                String value = condition[3];
-
-                boolean currentMatch = evaluateCondition(row.get(column), operator, value);
-
+            if (condition[0] == null) {
+                Set<String> matched = map.selectEntries(condition);
+                // AND behavior --> only keep mathcing elements in both sets
                 if (nextConditionShouldMatch) {
-                    overallMatch = overallMatch && currentMatch;
+                    ids.retainAll(matched);
+                    // OR behavior --> add all matching elements to the set
                 } else {
-                    overallMatch = overallMatch || currentMatch;
+                    ids.addAll(matched);
                 }
+            } else {
+                nextConditionShouldMatch = condition[0].equalsIgnoreCase("AND");
             }
         }
 
-        return overallMatch;
+        return ids;
     }
     
     // Helper method to access table data from HashMapPlusTree
