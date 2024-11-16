@@ -344,43 +344,30 @@ public class EngineLinearProbeHashMap extends Engine {
     }
 
     // Method to evaluate where conditions
-    private boolean evaluateWhereConditions(LinearProbeHashMap<String, String> row, List<String[]> conditions) {
-        boolean result = false;  // Default result should be false
-        boolean currentCondition = true; // Tracks the result of the current condition
-    
-        // Track if an OR operator was encountered
-        boolean previousConditionWasOR = false;
-    
+    private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
+        boolean overallMatch = true;
+        boolean nextConditionShouldMatch = true; // Default behavior for AND
+
         for (String[] condition : conditions) {
-            if (condition[0] != null) {  // Logical operator (AND/OR)
-                if (condition[0].equals("AND")) {
-                    // Apply AND logic: Combine currentCondition with result
-                    result = result && currentCondition;
-                    currentCondition = true; // Reset for the next condition
-                } else if (condition[0].equals("OR")) {
-                    // Apply OR logic: If the previous condition was OR, use OR
-                    if (previousConditionWasOR) {
-                        result = result || currentCondition;
-                    } else {
-                        result = currentCondition;
-                    }
-                    previousConditionWasOR = true;  // Mark that we encountered an OR
-                    currentCondition = true;  // Reset for the next condition
-                }
+            if (condition[0] != null) { // AND/OR operator
+                nextConditionShouldMatch = condition[0].equals("AND");
             } else {
-                // Evaluate individual condition (column, operator, value)
+                // Parse column, operator, and value
                 String column = condition[1];
                 String operator = condition[2];
                 String value = condition[3];
-    
-                currentCondition = evaluateCondition(row.get(column), operator, value);
+
+                boolean currentMatch = evaluateCondition(row.get(column), operator, value);
+
+                if (nextConditionShouldMatch) {
+                    overallMatch = overallMatch && currentMatch;
+                } else {
+                    overallMatch = overallMatch || currentMatch;
+                }
             }
         }
-    
-        // After finishing evaluation, combine the final condition with result
-        result = result || currentCondition;  // If it's OR, the last condition may still apply
-    
-        return result;
+
+        return overallMatch;
     }
 
     @Override
