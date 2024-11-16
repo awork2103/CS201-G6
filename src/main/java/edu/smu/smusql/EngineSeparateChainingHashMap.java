@@ -386,7 +386,7 @@ public class EngineSeparateChainingHashMap extends Engine{
     }
 
     // Method to evaluate where conditions
-    private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
+    private boolean evaluateWhereConditions(SeparateChainingHashMap<String, String> row, List<String[]> conditions) {
         boolean overallMatch = true;
         boolean nextConditionShouldMatch = true; // Default behavior for AND
 
