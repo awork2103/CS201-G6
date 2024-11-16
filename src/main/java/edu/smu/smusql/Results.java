@@ -156,7 +156,7 @@ public class Results {
 
     public void crudTestingLoadLinear(){
 
-        long numberOfQueries = 10000;
+        long numberOfQueries = 1000;
 
         TestResult linearProbe01Result;
         TestResult linearProbe05Result;
@@ -164,9 +164,9 @@ public class Results {
         TestResult linearProbe09Result;
 
         System.out.println("Linear probing Loadfactors tests");
-        System.out.println("LOADFACTOR : 0.1");
-        linearProbe01Result = helperResults.testingCRUDOnlyUserTable(new EngineLinearProbeHashMap(0.1), new Random(), numberOfQueries, hashMultiplier);
-        linearProbe01Result.results(numberOfQueries);
+        // System.out.println("LOADFACTOR : 0.1");
+        // linearProbe01Result = helperResults.testingCRUDOnlyUserTable(new EngineLinearProbeHashMap(0.1), new Random(), numberOfQueries, hashMultiplier);
+        // linearProbe01Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 0.5");
         linearProbe05Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.5), new Random(), numberOfQueries, hashMultiplier);
@@ -198,7 +198,9 @@ public class Results {
         //Tests the performace of crud between the hashtrees vs hashmaps
         //testingobj.crudTestingTreeMapAndNormal();
 
-        testingobj.crudTestingLoadFactorsChaining();
+        //testingobj.crudTestingLoadFactorsChaining();
+
+        testingobj.crudTestingLoadLinear();
 
     
         

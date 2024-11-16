@@ -23,11 +23,15 @@ public class Testing {
         
         prepopulateUserTable(random,  dbEngine,  numberOfQueries);
         System.gc(); 
+        selectFromUsers(dbEngine);
+        System.gc();
         updateRandomDataUsersTable(random, dbEngine, numberOfQueries);
         System.gc(); 
+        selectFromUsers(dbEngine);
         selectFromUsersWithWhere(dbEngine);
         System.gc(); 
         deleteAllData(dbEngine, numberOfQueries);
+        selectFromUsers(dbEngine);
         System.gc(); 
 
     }
@@ -37,7 +41,7 @@ public class Testing {
         dbEngine.executeSQL("CREATE TABLE products (id, name, price, category)");
         dbEngine.executeSQL("CREATE TABLE users (id, name, age, city)");
 
-        long numberOfQueries = 100000;
+        long numberOfQueries = 1000;
         prepopulateUserTable(random, dbEngine, numberOfQueries );
 
         for (int i = 0; i < 10; i++){
@@ -114,7 +118,7 @@ public class Testing {
             int age = 20 + random.nextInt(40); // Ages between 20 and 60
             String city = getRandomCity(random);
             String insertCommand = String.format("INSERT INTO users VALUES (%d, '%s', %d, '%s')", i, name, age, city);
-            dbEngine.executeSQL(insertCommand);
+            System.out.println(dbEngine.executeSQL(insertCommand));
         
         }
 
@@ -124,9 +128,9 @@ public class Testing {
         long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
         double timeTaken = nanosecondsToSeconds(end - start);
 
-        System.out.println("Time elapsed " + timeTaken + " seconds");
-        System.out.println("Memory used " + actualMemUsed + " MB");
-        System.out.println();
+        // System.out.println("Time elapsed " + timeTaken + " seconds");
+        // System.out.println("Memory used " + actualMemUsed + " MB");
+        // System.out.println();
 
     }
 
@@ -138,7 +142,7 @@ public class Testing {
         long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
         double start = nanosecondsToSeconds(System.nanoTime());
 
-        dbEngine.executeSQL(selectQuery);
+        System.out.println(dbEngine.executeSQL(selectQuery));
 
         double end = nanosecondsToSeconds(System.nanoTime());
         long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
@@ -146,9 +150,9 @@ public class Testing {
         long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
         double timeTaken = nanosecondsToSeconds(end - start);
 
-        System.out.println("Time elapsed " + timeTaken + " seconds");
-        System.out.println("Memory used " + actualMemUsed + " MB");
-        System.out.println();
+        // System.out.println("Time elapsed " + timeTaken + " seconds");
+        // System.out.println("Memory used " + actualMemUsed + " MB");
+        // System.out.println();
         
     }
 
@@ -159,7 +163,7 @@ public class Testing {
         long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
         double start = nanosecondsToSeconds(System.nanoTime());
 
-        dbEngine.executeSQL(selectQuery);
+        System.out.println(dbEngine.executeSQL(selectQuery));
 
         double end = nanosecondsToSeconds(System.nanoTime());
         long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
@@ -167,9 +171,9 @@ public class Testing {
         long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
         double timeTaken = nanosecondsToSeconds(end - start);
 
-        System.out.println("Time elapsed " + timeTaken + " seconds");
-        System.out.println("Memory used " + actualMemUsed + " MB");
-        System.out.println();
+        // System.out.println("Time elapsed " + timeTaken + " seconds");
+        // System.out.println("Memory used " + actualMemUsed + " MB");
+        // System.out.println();
     }
 
     private static void updateRandomDataUsersTable(Random random, Engine dbEngine, long number){
@@ -181,9 +185,9 @@ public class Testing {
 
         for (long i = 0; i < number; i++) {
             int id = random.nextInt((int)number) + 1;
-            int newAge = random.nextInt(60) + 20;
+            int newAge = 69;
             String updateUserQuery = "UPDATE users SET age = " + newAge + " WHERE id = " + id;
-            dbEngine.executeSQL(updateUserQuery);
+            System.out.println(dbEngine.executeSQL(updateUserQuery));
         }
 
         double end = nanosecondsToSeconds(System.nanoTime());
@@ -193,9 +197,9 @@ public class Testing {
         long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
         double timeTaken = nanosecondsToSeconds(end - start);
 
-        System.out.println("Time elapsed " + timeTaken + " seconds");
-        System.out.println("Memory used " + actualMemUsed + " MB");
-        System.out.println();
+        // System.out.println("Time elapsed " + timeTaken + " seconds");
+        // System.out.println("Memory used " + actualMemUsed + " MB");
+        // System.out.println();
     }
 
     private static void deleteAllData(Engine dbEngine, long number) {
@@ -207,7 +211,7 @@ public class Testing {
 
         for (long i = 0; i < number; i++) {
             String deleteUserQuery = "DELETE FROM users WHERE id = " + i;
-            dbEngine.executeSQL(deleteUserQuery);
+            System.out.println(dbEngine.executeSQL(deleteUserQuery));
         }
 
         double end = nanosecondsToSeconds(System.nanoTime());
@@ -216,8 +220,8 @@ public class Testing {
         long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
         double timeTaken = nanosecondsToSeconds(end - start);
 
-        System.out.println("Time elapsed " + timeTaken + " seconds");
-        System.out.println("Memory used " + actualMemUsed + " MB");
-        System.out.println();
+        // System.out.println("Time elapsed " + timeTaken + " seconds");
+        // System.out.println("Memory used " + actualMemUsed + " MB");
+        // System.out.println();
     }
 }
