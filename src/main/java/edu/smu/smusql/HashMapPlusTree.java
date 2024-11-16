@@ -132,7 +132,7 @@ public class HashMapPlusTree {
         if (condition == null) {
             return null;
         }
-        
+
         Set<String> resultSet = new HashSet<>();
         if (condition[0] == null) {
             // {null, column, operator, value}
@@ -141,7 +141,9 @@ public class HashMapPlusTree {
 
             switch (condition[2]) {
                 case "=":
-                    resultSet.addAll(tree.get(value));
+                    if (tree.containsKey(value)) {
+                        resultSet.addAll(tree.get(value));
+                    }
                     break;
                 case "<":
                     for (Map.Entry<String, Set<String>> entry : tree.headMap(value, false).entrySet()) {
