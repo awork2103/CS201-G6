@@ -11,6 +11,11 @@ import java.util.Set;
 public class EngineLinearProbeHashMap extends Engine {
 
     private Map<String, LinearProbeHashMap<String, Map<String, String>>> tables = new HashMap<>();
+    private double loadFactor;
+
+    public EngineLinearProbeHashMap(double loadFactor){
+        this.loadFactor = loadFactor; 
+    }
 
     public String executeSQL(String query) {
         String[] tokens = query.trim().split("\\s+");
@@ -50,7 +55,7 @@ public class EngineLinearProbeHashMap extends Engine {
         List<String> columns = Arrays.asList(columnList.split(","));
         columns.replaceAll(String::trim);
 
-        LinearProbeHashMap<String, Map<String, String>> newTable = new LinearProbeHashMap<>();
+        LinearProbeHashMap<String, Map<String, String>> newTable = new LinearProbeHashMap<>(loadFactor);
         tables.put(tableName, newTable);
 
         return "Table " + tableName + " created successfully with columns: " + columns;

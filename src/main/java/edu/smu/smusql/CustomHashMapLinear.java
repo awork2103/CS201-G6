@@ -15,6 +15,14 @@ public class CustomHashMapLinear {
         this.table = new LinearProbeHashMap<String, LinearProbeHashMap<String, String>>(16, 0.75, 31, "DEFAULT");
     }  
 
+    public CustomHashMapLinear(String tableName, List<String> columns, double loadFactor) {
+        this.tableName = tableName;
+        this.columns = columns;
+        // LinearProbeHashMap(int capacity, float loadFactor, int hashMultiplier, String hashingStrategy)
+        // Types of hashing strategies: DEFAULT, BITWISE, POLYNOMIAL, CYCLIC, ADDITIVE
+        this.table = new LinearProbeHashMap<String, LinearProbeHashMap<String, String>>(16, loadFactor, 31, "DEFAULT");
+    }  
+
     public void addEntry(LinearProbeHashMap<String, String> entry) {
         table.put(entry.get("id"), entry);
     }

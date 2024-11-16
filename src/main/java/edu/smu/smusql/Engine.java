@@ -28,13 +28,8 @@ public class Engine {
         }
     }
 
-    public void getMemConsumptionForEachTable(){
-
-        for (String tableName : tables.keySet()){
-            CustomHashMap table = tables.get(tableName);
-            System.out.println("Memory consumption for table " + tableName + " : " + table.getMemConsumption());
-            System.gc();
-        }
+    public long getMemConsumptionForTable(String tableName){
+        return tables.get(tableName).getMemConsumption();
 
     }
 

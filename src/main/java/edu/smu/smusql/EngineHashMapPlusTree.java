@@ -6,13 +6,9 @@ public class EngineHashMapPlusTree extends Engine{
 
     private Map<String, HashMapPlusTree> tables = new HashMap<>();
 
-    public void getMemConsumptionForEachTable(){
+    public long getMemConsumptionForTable(String tableName){
 
-        for (String tableName : tables.keySet()){
-            HashMapPlusTree table = tables.get(tableName);
-            System.out.println("Memory consumption for table " + tableName + " : " + table.getMemConsumption());
-            System.gc();
-        }
+        return tables.get(tableName).getMemConsumption();
 
     }
 

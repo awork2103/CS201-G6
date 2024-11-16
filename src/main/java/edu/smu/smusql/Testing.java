@@ -37,7 +37,7 @@ public class Testing {
         dbEngine.executeSQL("CREATE TABLE products (id, name, price, category)");
         dbEngine.executeSQL("CREATE TABLE users (id, name, age, city)");
 
-        long numberOfQueries = 10;
+        long numberOfQueries = 100000;
         prepopulateUserTable(random, dbEngine, numberOfQueries );
 
         for (int i = 0; i < 10; i++){

@@ -24,6 +24,10 @@ public class LinearProbeHashMap<K, V> {
         this(DEFAULT_CAPACITY, 0.75, 31, "POLYNOMIAL");
     }
 
+    public LinearProbeHashMap(double loadFactor) {
+        this(DEFAULT_CAPACITY, loadFactor, 31, "POLYNOMIAL");
+    }
+
     // Entry to store key-value pairs
     private static class Entry<K, V> {
         K key;
