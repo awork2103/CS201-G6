@@ -79,6 +79,55 @@ public class HashMapPlusTree {
         }
     }
 
+    public void updateEntry(String id, Map<String, String> updates) {
+        // Retrieve the existing entry
+        HashMap<String, String> existingEntry = table.get(id);
+        if (existingEntry == null) {
+            return;
+        }
+    
+        // Update the entry with the new key-value pairs
+        for (Map.Entry<String, String> update : updates.entrySet()) {
+            String column = update.getKey();
+            String newValue = update.getValue();
+            String oldValue = existingEntry.get(column);
+    
+            if (oldValue != null && !oldValue.equals(newValue)) {
+                // Update the TreeMap for the old value
+                TreeMap<String, Set<String>> columnTree = getTree(column);
+                Set<String> ids = columnTree.get(oldValue);
+                if (ids != null) {
+                    ids.remove(id);
+                    if (ids.isEmpty()) {
+                        columnTree.remove(oldValue);
+                    } else {
+                        columnTree.put(oldValue, ids);
+                    }
+                }
+            }
+    
+            // Update the entry
+            existingEntry.put(column, newValue);
+    
+            // Update the TreeMap for the new value
+            TreeMap<String, Set<String>> columnTree = getTree(column);
+            if (columnTree == null) {
+                columnTree = new TreeMap<>();
+                tree.put(column, columnTree);
+            }
+            Set<String> ids = columnTree.get(newValue);
+            if (ids == null) {
+                ids = new HashSet<>();
+                columnTree.put(newValue, ids);
+            }
+            ids.add(id);
+        }
+    
+        // Put the updated entry back into the table
+        table.put(id, existingEntry);
+    }
+
+
     public HashMap<String, String> getEntry(String id) {
         return table.get(id);
     }
@@ -127,7 +176,7 @@ public class HashMapPlusTree {
                     }
                     break;
             }
-            
+
         }
         return resultSet;
     }

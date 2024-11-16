@@ -100,23 +100,9 @@ public class EngineHashMapPlusTree extends Engine{
         if (!entry.containsKey("id")) {
             return "ERROR: Entry must have an ID";
         }
-    
-        String id = entry.get("id");
         
         // Add the entry to the table hashmap
         table.addEntry(entry);
-    
-        // Add the entry to each TreeMap in `tree` based on the column name
-        for (int i = 0; i < columns.size(); i++) {
-            String column = columns.get(i);
-            String columnValue = entry.get(column);
-            
-            if (columnValue == null) {
-                return "ERROR: Missing value for column '" + column + "'";
-            }
-    
-            table.getTree(column).put(id, columnValue);
-        }
     
         return "SUCCESS: Row inserted into " + tableName;
     }
@@ -135,29 +121,6 @@ public class EngineHashMapPlusTree extends Engine{
     
         // Parse WHERE conditions using parseDelete method
         List<String[]> whereConditions = parseDelete(tokens); 
-    
-        // if (whereConditions.isEmpty()) {
-        //     return "ERROR: Invalid or unsupported WHERE conditions";
-        // }
-    
-        // Set<String> idsToDelete = new HashSet<>();
-    
-        // // Iterate over the rows to evaluate conditions
-        // for (String key : table.getTable().keySet()) {
-        //     Map<String, String> entry = table.getEntry(key);
-        //     if (entry == null) continue;
-    
-        //     boolean match = evaluateWhereConditions(entry, whereConditions);
-    
-        //     if (match) {
-        //         idsToDelete.add(key);
-        //     }
-        // }
-    
-        // // Delete matching rows
-        // for (String id : idsToDelete) {
-        //     table.deleteEntry(id);
-        // }
 
         int deletedIds = 0;
         Set<String> ids = evaluateWhereConditions(table, whereConditions);
@@ -188,20 +151,6 @@ public class EngineHashMapPlusTree extends Engine{
 
         StringBuilder result = new StringBuilder();
         result.append(String.join("\t", columns)).append("\n");
-
-        // for (String key : table.getTable().keySet()) {
-        //     Map<String, String> entry = table.getEntry(key);
-        //     if (entry == null) continue;
-
-        //     boolean match = evaluateWhereConditions(entry, whereConditions);
-
-        //     if (match) {
-        //         for (String column : columns) {
-        //             result.append(entry.getOrDefault(column, "NULL")).append("\t");
-        //         }
-        //         result.append("\n");
-        //     }
-        // }
 
         Set<String> ids = evaluateWhereConditions(table, whereConditions);
         for (String id : ids) {
@@ -264,38 +213,13 @@ public class EngineHashMapPlusTree extends Engine{
         List<String[]> whereConditions = parseUpdate(tokens);
     
         int updatedCount = 0;
-    
-        // // Iterate over rows
-        // for (String key : table.getTable().keySet()) {
-        //     Map<String, String> entry = table.getEntry(key);
-        //     if (entry == null) continue;
-    
-        //     boolean match = evaluateWhereConditions(entry, whereConditions);
-    
-        //     if (match) {
-        //         for (Map.Entry<String, String> update : updates.entrySet()) {
-        //             entry.put(update.getKey(), update.getValue());
-        //         }
-        //         updatedCount++;
-        //     }
-        // }
-    
-        // return "SUCCESS: " + updatedCount + " row(s) updated in " + tableName;
+
 
         Set<String> ids = evaluateWhereConditions(table, whereConditions);
 
         // Update a row
         for (String id : ids) {
-            // Get HashMap of columns
-            Map<String, String> entry = table.getEntry(id);
-            if (entry == null)
-                continue;
-
-            // Put in updated values into the column tree
-            for (Map.Entry<String, String> update : updates.entrySet()) {
-                entry.put(update.getKey(), update.getValue());
-            }
-            updatedCount++;
+            table.updateEntry(id, updates);
         }
 
         return "SUCCESS: " + updatedCount + " row(s) updated in " + tableName;
@@ -349,10 +273,11 @@ public class EngineHashMapPlusTree extends Engine{
         }
         
         Set<String> ids = new HashSet<>();
-        boolean nextConditionShouldMatch = true; // If true == AND operator, if false == OR operator
+        boolean nextConditionShouldMatch = false; // If true == AND operator, if false == OR operator
         for (String[] condition : conditions) {
             if (condition[0] == null) {
                 Set<String> matched = map.selectEntries(condition);
+                System.out.println(matched);
                 // AND behavior --> only keep mathcing elements in both sets
                 if (nextConditionShouldMatch) {
                     ids.retainAll(matched);
