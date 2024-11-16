@@ -101,7 +101,7 @@ public class Results {
 
     public void crudTestingTreeMapAndNormal(){
 
-        long numberOfQueries = 1000;
+        long numberOfQueries = 5000;
         TestResult HashtreeMapResults;
         TestResult controlEngineResults;
         int numOfRuns = 5;
@@ -134,19 +134,19 @@ public class Results {
         // chaining01Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 0.5");
-        chaining05Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.5), new Random(), numberOfQueries, hashMultiplier);
+        chaining05Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.5), new Random(), numberOfQueries, 5);
         chaining05Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 0.75");
-        chaining075Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.75), new Random(), numberOfQueries, hashMultiplier);
+        chaining075Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.75), new Random(), numberOfQueries, 5);
         chaining075Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 0.9");
-        chaining09Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.9), new Random(), numberOfQueries, hashMultiplier);
+        chaining09Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.9), new Random(), numberOfQueries, 5);
         chaining09Result.results(numberOfQueries);
 
-        System.out.println("LOADFACTOR : 2");
-        chaining2Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(2), new Random(), numberOfQueries, hashMultiplier);
+        System.out.println("LOADFACTOR : 1");
+        chaining2Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(1), new Random(), numberOfQueries, 5);
         chaining2Result.results(numberOfQueries);
 
         
@@ -190,15 +190,15 @@ public class Results {
         Results testingobj = new Results();
 
         //Tests the meomory and time of inserting between hashtrees storing the data vs hashmaps
-        testingobj.testHashMapWithTreesInsertionComparison();
+        // testingobj.testHashMapWithTreesInsertionComparison();
 
         //Tests the performance of each function
         //testingobj.testHashFunction();
 
         //Tests the performace of crud between the hashtrees vs hashmaps
-        testingobj.crudTestingTreeMapAndNormal();
+        // testingobj.crudTestingTreeMapAndNormal();
 
-        // testingobj.crudTestingLoadFactorsChaining();
+        testingobj.crudTestingLoadFactorsChaining();
 
         // testingobj.crudTestingLoadLinear();
 
