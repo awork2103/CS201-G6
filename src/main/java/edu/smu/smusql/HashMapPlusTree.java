@@ -65,21 +65,21 @@ public class HashMapPlusTree {
         return tree.get(columns.indexOf(column));
     }
 
-    public Set<Entry<String, String>> selectEntries(String[] condition) {
+    public Set<String> selectEntries(String[] condition) {
         if (condition[0] == null) {
             // {null, column, operator, value}
             TreeMap<String, String> tree = getTree(condition[1]);
             switch(condition[2]) {
                 case "=":
-                    return tree.subMap(condition[3], true, condition[3], true).entrySet();
+                    return tree.subMap(condition[3], true, condition[3], true).keySet();
                 case "<":
-                    return tree.headMap(condition[3], false).entrySet();
+                    return tree.headMap(condition[3], false).keySet();
                 case ">":
-                    return tree.tailMap(condition[3], false).entrySet();
+                    return tree.tailMap(condition[3], false).keySet();
                 case "<=":
-                    return tree.headMap(condition[3], true).entrySet();
+                    return tree.headMap(condition[3], true).keySet();
                 case ">=":
-                    return tree.tailMap(condition[3], true).entrySet();
+                    return tree.tailMap(condition[3], true).keySet();
                 default:
                     return null;
             }
