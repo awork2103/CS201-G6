@@ -220,6 +220,7 @@ public class EngineHashMapPlusTree extends Engine{
         // Update a row
         for (String id : ids) {
             table.updateEntry(id, updates);
+            updatedCount++;
         }
 
         return "SUCCESS: " + updatedCount + " row(s) updated in " + tableName;

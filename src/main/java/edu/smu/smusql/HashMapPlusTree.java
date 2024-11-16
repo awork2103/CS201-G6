@@ -85,48 +85,32 @@ public class HashMapPlusTree {
         if (existingEntry == null) {
             return;
         }
-    
-        // Update the entry with the new key-value pairs
-        for (Map.Entry<String, String> update : updates.entrySet()) {
-            String column = update.getKey();
-            String newValue = update.getValue();
-            String oldValue = existingEntry.get(column);
-    
-            if (oldValue != null && !oldValue.equals(newValue)) {
-                // Update the TreeMap for the old value
-                TreeMap<String, Set<String>> columnTree = getTree(column);
-                Set<String> ids = columnTree.get(oldValue);
-                if (ids != null) {
-                    ids.remove(id);
-                    if (ids.isEmpty()) {
-                        columnTree.remove(oldValue);
-                    } else {
-                        columnTree.put(oldValue, ids);
-                    }
-                }
-            }
-    
-            // Update the entry
-            existingEntry.put(column, newValue);
-    
-            // Update the TreeMap for the new value
-            TreeMap<String, Set<String>> columnTree = getTree(column);
-            if (columnTree == null) {
-                columnTree = new TreeMap<>();
-                tree.put(column, columnTree);
-            }
-            Set<String> ids = columnTree.get(newValue);
-            if (ids == null) {
-                ids = new HashSet<>();
-                columnTree.put(newValue, ids);
-            }
-            ids.add(id);
-        }
-    
-        // Put the updated entry back into the table
-        table.put(id, existingEntry);
-    }
 
+        // Update Trees whose columns have been updated
+        for (Map.Entry<String, String> update : updates.entrySet()) {
+            String columnName = update.getKey();
+            String columnValue = update.getValue();
+
+            // Get the tree for the column
+            TreeMap<String, Set<String>> columnTree = getTree(columnName);
+
+            // Search for id in Tree with old ColumnValue
+            String oldColumnValue = existingEntry.get(columnName);
+            Set<String> ids = columnTree.get(oldColumnValue);
+            ids.remove(id);
+
+            // Search for new ColumnValue and insert id into the set
+            ids = columnTree.getOrDefault(columnValue, new HashSet<>());
+            ids.add(id);
+            columnTree.put(columnValue, ids);
+        }
+
+        // Update the HashMap with the new key-value pairs
+        for (Map.Entry<String, String> update : updates.entrySet()) {
+            existingEntry.put(update.getKey(), update.getValue());
+        }
+
+    }
 
     public HashMap<String, String> getEntry(String id) {
         return table.get(id);
