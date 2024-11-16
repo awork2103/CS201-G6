@@ -1,6 +1,7 @@
 package edu.smu.smusql;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 public class HashMapPlusTree {
     private String tableName;
@@ -62,5 +63,27 @@ public class HashMapPlusTree {
 
     public TreeMap<String, String> getTree(String column) {
         return tree.get(columns.indexOf(column));
+    }
+
+    public Set<Entry<String, String>> selectEntries(String[] condition) {
+        if (condition[0] == null) {
+            // {null, column, operator, value}
+            TreeMap<String, String> tree = getTree(condition[1]);
+            switch(condition[2]) {
+                case "=":
+                    return tree.subMap(condition[3], true, condition[3], true).entrySet();
+                case "<":
+                    return tree.headMap(condition[3], false).entrySet();
+                case ">":
+                    return tree.tailMap(condition[3], false).entrySet();
+                case "<=":
+                    return tree.headMap(condition[3], true).entrySet();
+                case ">=":
+                    return tree.tailMap(condition[3], true).entrySet();
+                default:
+                    return null;
+            }
+        }
+        return null;
     }
 }
