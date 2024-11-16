@@ -6,6 +6,7 @@ public class HashMapPlusTree {
     private String tableName;
     private List<String> columns;
     private HashMap<String, HashMap<String, String>> table;
+    public long initialmem;
     // TreeMap<ID, Colummn Value>
     ArrayList<TreeMap<String, String>> tree = new ArrayList<TreeMap<String, String>>();
 
@@ -13,11 +14,16 @@ public class HashMapPlusTree {
         this.tableName = tableName;
         this.columns = columns;
         this.table = new HashMap<String, HashMap<String, String>>();
+        initialmem = Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
 
         for (int i = 0; i < columns.size(); i++) {
             tree.add(new TreeMap<String, String>());
         }
     }  
+
+    public long getMemConsumption(){
+        return Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory() - initialmem;
+    }
 
     public HashMap<String, HashMap<String, String>> getTable() {
         return table;  

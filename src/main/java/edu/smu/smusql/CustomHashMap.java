@@ -6,15 +6,21 @@ public class CustomHashMap {
     private String tableName;
     private List<String> columns;
     private HashMap<String, HashMap<String, String>> table;
+    public long initialmem;
 
     public CustomHashMap(String tableName, List<String> columns) {
         this.tableName = tableName;
         this.columns = columns;
         this.table = new HashMap<String, HashMap<String, String>>();
+        initialmem = Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
     }  
 
     public void addEntry(HashMap<String, String> entry) {
         table.put(entry.get("id"), entry);
+    }
+
+    public long getMemConsumption(){
+        return Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory() - initialmem;
     }
 
 

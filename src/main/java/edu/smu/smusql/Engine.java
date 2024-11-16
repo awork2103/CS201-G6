@@ -28,6 +28,16 @@ public class Engine {
         }
     }
 
+    public void getMemConsumptionForEachTable(){
+
+        for (String tableName : tables.keySet()){
+            CustomHashMap table = tables.get(tableName);
+            System.out.println("Memory consumption for table " + tableName + " : " + table.getMemConsumption());
+            System.gc();
+        }
+
+    }
+
     public String insert(String[] tokens) {
         // Basic syntax check
         if (!tokens[1].toUpperCase().equals("INTO")) {
