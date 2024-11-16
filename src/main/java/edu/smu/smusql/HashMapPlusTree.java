@@ -129,6 +129,10 @@ public class HashMapPlusTree {
     }
 
     public Set<String> selectEntries(String[] condition) {
+        if (condition == null) {
+            return null;
+        }
+        
         Set<String> resultSet = new HashSet<>();
         if (condition[0] == null) {
             // {null, column, operator, value}
