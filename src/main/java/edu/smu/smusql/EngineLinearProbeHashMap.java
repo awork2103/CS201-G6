@@ -13,6 +13,9 @@ public class EngineLinearProbeHashMap extends Engine {
         this.loadFactor = loadFactor; 
     }
 
+    public EngineLinearProbeHashMap(){
+    }
+
     @Override
     public String executeSQL(String query) {
         String[] tokens = query.trim().split("\\s+");
@@ -102,7 +105,7 @@ public class EngineLinearProbeHashMap extends Engine {
             if (entry == null) continue;
 
             // Cast the entry to Map<String, String>
-            boolean match = evaluateWhereConditions((Map<String, String>) entry, whereConditions);
+            boolean match = evaluateWhereConditions((LinearProbeHashMap<String, String>) entry, whereConditions);
 
             if (match) {
                 for (String column : columns) {
@@ -140,7 +143,7 @@ public class EngineLinearProbeHashMap extends Engine {
             LinearProbeHashMap<String, String> entry = table.getEntry(key);
             if (entry == null) continue;
 
-            boolean match = evaluateWhereConditions((Map<String, String>) entry, whereConditions);
+            boolean match = evaluateWhereConditions((LinearProbeHashMap<String, String>) entry, whereConditions);
 
             if (match) {
                 idsToDelete.add(key);
@@ -209,7 +212,7 @@ public class EngineLinearProbeHashMap extends Engine {
             LinearProbeHashMap<String, String> entry = table.getEntry(key);
             if (entry == null) continue;
 
-            boolean match = evaluateWhereConditions((Map<String, String>) entry, whereConditions);
+            boolean match = evaluateWhereConditions((LinearProbeHashMap<String, String>) entry, whereConditions);
 
             if (match) {
                 for (Map.Entry<String, String> update : updates.entrySet()) {
@@ -341,7 +344,7 @@ public class EngineLinearProbeHashMap extends Engine {
     }
 
     // Method to evaluate where conditions
-    private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
+    private boolean evaluateWhereConditions(LinearProbeHashMap<String, String> row, List<String[]> conditions) {
         boolean result = false;  // Default result should be false
         boolean currentCondition = true; // Tracks the result of the current condition
     
