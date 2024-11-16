@@ -278,7 +278,6 @@ public class EngineHashMapPlusTree extends Engine{
         for (String[] condition : conditions) {
             if (condition[0] == null) {
                 Set<String> matched = map.selectEntries(condition);
-                System.out.println(matched);
                 // AND behavior --> only keep mathcing elements in both sets
                 if (nextConditionShouldMatch) {
                     ids.retainAll(matched);
