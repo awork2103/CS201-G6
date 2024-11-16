@@ -42,17 +42,17 @@ public class Main {
                 System.out.println();
                 Testing.testingCRUDOnlyUserTable(new Engine(), new Random(), 10);
 
-                System.out.println("Hashmap and tree engine");
-                System.out.println();
-                Testing.testingCRUDOnlyUserTable(new EngineHashMapPlusTree(), new Random(), 10);
+                // System.out.println("Hashmap and tree engine");
+                // System.out.println();
+                // Testing.testingCRUDOnlyUserTable(new EngineHashMapPlusTree(), new Random(), 10);
 
-                System.out.println("Seperate chaining engine");
-                System.out.println();
-                Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(), new Random(), 10);
+                // System.out.println("Seperate chaining engine");
+                // System.out.println();
+                // Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(), new Random(), 10);
 
-                System.out.println("Linear probing engine");
-                System.out.println();
-                Testing.testingCRUDOnlyUserTable(new EngineLinearProbeHashMap(), new Random(), 10);
+                // System.out.println("Linear probing engine");
+                // System.out.println();
+                // Testing.testingCRUDOnlyUserTable(new EngineLinearProbeHashMap(), new Random(), 10);
 
             // inserting into 2 tables and see if it works
 

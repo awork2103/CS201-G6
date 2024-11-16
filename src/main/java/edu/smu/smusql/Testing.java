@@ -22,17 +22,24 @@ public class Testing {
         dbEngine.executeSQL("CREATE TABLE users (id, name, age, city)");
         
         prepopulateUserTable(random,  dbEngine,  numberOfQueries);
-        System.gc(); 
+
         selectFromUsers(dbEngine);
-        System.gc();
+
         updateRandomDataUsersTable(random, dbEngine, numberOfQueries);
-        System.gc(); 
         selectFromUsers(dbEngine);
-        selectFromUsersWithWhere(dbEngine);
-        System.gc(); 
+
+        selectFromUsersWithWhereAND(dbEngine);
+
+        selectFromUsersWithWhereOR(dbEngine);
+
+        updateWithWhere(dbEngine);
+        selectFromUsers(dbEngine);
+
+        deleteWithWhere(dbEngine);
+        selectFromUsers(dbEngine);
+
         deleteAllData(dbEngine, numberOfQueries);
         selectFromUsers(dbEngine);
-        System.gc(); 
 
     }
 
@@ -156,7 +163,7 @@ public class Testing {
         
     }
 
-    private static void selectFromUsersWithWhere(Engine dbEngine){
+    private static void selectFromUsersWithWhereOR(Engine dbEngine){
         System.out.println("SELECT WITH WHERE age > 40 OR city = 'New York'");
 
         String selectQuery = "SELECT * FROM users WHERE age > 40 OR city = 'New York'"; // 
@@ -176,6 +183,44 @@ public class Testing {
         // System.out.println("Memory used " + actualMemUsed + " MB");
         // System.out.println();
     }
+
+    private static void selectFromUsersWithWhereAND(Engine dbEngine){
+        System.out.println("SELECT WITH WHERE age < 50 AND city = 'Austin'");
+
+        String selectQuery = "SELECT * FROM users WHERE age > 40 AND city = 'Austin'"; // 
+
+        long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+        double start = nanosecondsToSeconds(System.nanoTime());
+
+        System.out.println(dbEngine.executeSQL(selectQuery));
+
+
+        double end = nanosecondsToSeconds(System.nanoTime());
+        long afterUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+
+        long actualMemUsed=bytesToMegabytes(afterUsedMem - beforeUsedMem);
+        double timeTaken = nanosecondsToSeconds(end - start);
+
+        // System.out.println("Time elapsed " + timeTaken + " seconds");
+        // System.out.println("Memory used " + actualMemUsed + " MB");
+        // System.out.println();
+    }
+
+    private static void updateWithWhere(Engine dbEngine){
+        System.out.println("UPDATE WITH WHERE age < 50 AND city = 'Austin'");
+
+        String updateUserQuery = "UPDATE users SET city = 'Denver' WHERE age < 30";
+        dbEngine.executeSQL(updateUserQuery);
+    }
+
+    private static void deleteWithWhere(Engine dbEngine){
+        System.out.println("dELETE WITH WHERE age < 50 AND city = 'Austin'");
+
+        String deleteUserQuery = "DELETE users SET city = 'Denver' WHERE age < 30";
+        dbEngine.executeSQL(deleteUserQuery);
+    }
+
+
 
     private static void updateRandomDataUsersTable(Random random, Engine dbEngine, long number){
 
