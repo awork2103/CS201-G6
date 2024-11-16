@@ -11,11 +11,14 @@ public class Main {
      *  MODIFICATION OF THIS FILE IS NOT RECOMMENDED!
      */
     static Engine dbEngine = new Engine();
+
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("smuSQL Starter Code version 0.5");
         System.out.println("Have fun, and good luck!");
+
+        
 
         while (true) {
             System.out.print("smusql> ");
@@ -34,13 +37,22 @@ public class Main {
             // testing CRUD functionality for 
 
 
-            }else if (query.equalsIgnoreCase("testfunctionality")) {
-
+            }else if (query.equalsIgnoreCase("testfunc")) {
+                System.out.println("Default hashmap engine");
+                System.out.println();
                 Testing.testingCRUDOnlyUserTable(new Engine(), new Random(), 10);
 
+                System.out.println("Hashmap and tree engine");
+                System.out.println();
                 Testing.testingCRUDOnlyUserTable(new EngineHashMapPlusTree(), new Random(), 10);
 
+                System.out.println("Seperate chaining engine");
+                System.out.println();
                 Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(), new Random(), 10);
+
+                System.out.println("Linear probing engine");
+                System.out.println();
+                Testing.testingCRUDOnlyUserTable(new EngineLinearProbeHashMap(), new Random(), 10);
 
             // inserting into 2 tables and see if it works
 

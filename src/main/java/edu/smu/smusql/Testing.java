@@ -157,8 +157,9 @@ public class Testing {
     }
 
     private static void selectFromUsersWithWhere(Engine dbEngine){
-        System.out.println("SELECT WITH WHERE");
-        String selectQuery = "SELECT * FROM users WHERE age > 40 AND city = 'New York'";
+        System.out.println("SELECT WITH WHERE age > 40 OR city = 'New York'");
+
+        String selectQuery = "SELECT * FROM users WHERE age > 40 OR city = 'New York'"; // 
 
         long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
         double start = nanosecondsToSeconds(System.nanoTime());
@@ -179,13 +180,14 @@ public class Testing {
     private static void updateRandomDataUsersTable(Random random, Engine dbEngine, long number){
 
         System.out.println("UPDATING");
+        System.out.println("VALUUE WILL BE UPDATED TO 42");
         
         long beforeUsedMem=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
         double start = nanosecondsToSeconds(System.nanoTime());
 
         for (long i = 0; i < number; i++) {
             int id = random.nextInt((int)number) + 1;
-            int newAge = 69;
+            int newAge = 42;
             String updateUserQuery = "UPDATE users SET age = " + newAge + " WHERE id = " + id;
             System.out.println(dbEngine.executeSQL(updateUserQuery));
         }
