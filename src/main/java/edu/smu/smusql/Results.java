@@ -6,6 +6,7 @@ import java.util.*;
 public class Results {
 
     int numberOfRuns = 5;
+    int hashMultiplier = 31;
 
     private static final long MEGABYTE = 1024L * 1024L;
     private static final long nano = 1000000000;
@@ -237,7 +238,7 @@ public class Results {
         //Tests the performace of crud between the hashtrees vs hashmaps
         //testingobj.crudTestingTreeMapAndNormal();
 
-        testingobj.crudTestingLoadFactorsChaining();
+        //testingobj.crudTestingLoadFactorsChaining();
 
         // testingobj.crudTestingLoadLinear();
 
