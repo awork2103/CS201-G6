@@ -246,7 +246,7 @@ public class EngineSeparateChainingHashMap extends Engine{
     
         // Iterate over rows and apply updates where conditions are met
         for (String key : table.getKeys()) {
-            Map<String, String> entry = table.getEntry(key);
+            SeparateChainingHashMap<String, String> entry = table.getEntry(key);
             if (entry == null) continue;
     
             // Check if the current entry matches the WHERE conditions
@@ -386,7 +386,7 @@ public class EngineSeparateChainingHashMap extends Engine{
     }
 
     // Method to evaluate where conditions
-    private boolean evaluateWhereConditions(Map<String, String> row, List<String[]> conditions) {
+    private boolean evaluateWhereConditions(SeparateChainingHashMap<String, String> row, List<String[]> conditions) {
         boolean result = false;  // Default result should be false
         boolean currentCondition = true; // Tracks the result of the current condition
     
