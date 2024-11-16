@@ -5,11 +5,11 @@ import java.util.*;
 public class HashMapPlusTree {
     private String tableName;
     private List<String> columns;
-    // HashMap<ID, HashMap<ColumnName, Tree>>
+    // HashMap<ID, HashMap<ColumnName, CoumnValue>>
     private HashMap<String, HashMap<String, String>> table;
     public long initialmem;
-    // TreeMap<ID, Colummn Value>
-    ArrayList<TreeMap<String, String>> tree = new ArrayList<TreeMap<String, String>>();
+    // TreeMap<ColumnValue, List<ID>>
+    ArrayList<TreeMap<String, Set<String>>> tree = new ArrayList<>();
 
     public HashMapPlusTree(String tableName, List<String> columns) {
         this.tableName = tableName;
@@ -18,7 +18,7 @@ public class HashMapPlusTree {
         initialmem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
         for (int i = 0; i < columns.size(); i++) {
-            tree.add(new TreeMap<String, String>());
+            tree.add(new TreeMap<String, Set<String>>(new TreeCustomComparator()));
         }
     }
 
@@ -31,21 +31,51 @@ public class HashMapPlusTree {
     }
 
     public void addEntry(HashMap<String, String> entry) {
-        table.put(entry.get("id"), entry);
+        String id = entry.get("id");
+        table.put(id, entry);
 
         // Add all column values to respective trees
         for (int i = 0; i < columns.size(); i++) {
-            // tree.get(i) --> get the tree for the column
-            tree.get(i).put(entry.get("id"), entry.get(columns.get(i)));
+            String columnName = columns.get(i);
+            String columnValue = entry.get(columnName);
+
+            // Get the tree for the column
+            TreeMap<String, Set<String>> columnTree = tree.get(i);
+
+            // Get or create the set of IDs for the column value
+            Set<String> ids = columnTree.getOrDefault(columnValue, new HashSet<>());
+            ids.add(id);
+
+            // Put the updated set back into the tree
+            columnTree.put(columnValue, ids);
         }
     }
 
     public void deleteEntry(String id) {
-        table.remove(id);
+        // Get the entry to be deleted
+        HashMap<String, String> entry = table.remove(id);
 
-        // Delete all column values from respective trees
-        for (int i = 0; i < columns.size(); i++) {
-            tree.get(i).remove(id);
+        if (entry != null) {
+            // Delete all column values from respective trees
+            for (int i = 0; i < columns.size(); i++) {
+                String columnName = columns.get(i);
+                String columnValue = entry.get(columnName);
+
+                // Get the tree for the column
+                TreeMap<String, Set<String>> columnTree = tree.get(i);
+
+                // Get the set of IDs for the column value
+                Set<String> ids = columnTree.get(columnValue);
+                if (ids != null) {
+                    ids.remove(id);
+                    // If the set is empty, remove the entry from the tree
+                    if (ids.isEmpty()) {
+                        columnTree.remove(columnValue);
+                    } else {
+                        columnTree.put(columnValue, ids);
+                    }
+                }
+            }
         }
     }
 
@@ -61,58 +91,44 @@ public class HashMapPlusTree {
         return columns;
     }
 
-    public TreeMap<String, String> getTree(String column) {
+    public TreeMap<String, Set<String>> getTree(String column) {
         return tree.get(columns.indexOf(column));
     }
 
     public Set<String> selectEntries(String[] condition) {
+        Set<String> resultSet = new HashSet<>();
         if (condition[0] == null) {
-            
             // {null, column, operator, value}
-            TreeMap<String, String> tree = getTree(condition[1]);
+            TreeMap<String, Set<String>> tree = getTree(condition[1]);
             String value = condition[3];
-            boolean isNumeric;
 
-            try {
-                Integer.parseInt(value);
-                isNumeric = true;
-            } catch (NumberFormatException e) {
-                isNumeric = false;
+            switch (condition[2]) {
+                case "=":
+                    resultSet.addAll(tree.get(value));
+                    break;
+                case "<":
+                    for (Map.Entry<String, Set<String>> entry : tree.headMap(value, false).entrySet()) {
+                        resultSet.addAll(entry.getValue());
+                    }
+                    break;
+                case ">":
+                    for (Map.Entry<String, Set<String>> entry : tree.tailMap(value, false).entrySet()) {
+                        resultSet.addAll(entry.getValue());
+                    }
+                    break;
+                case "<=":
+                    for (Map.Entry<String, Set<String>> entry : tree.headMap(value, true).entrySet()) {
+                        resultSet.addAll(entry.getValue());
+                    }
+                    break;
+                case ">=":
+                    for (Map.Entry<String, Set<String>> entry : tree.tailMap(value, true).entrySet()) {
+                        resultSet.addAll(entry.getValue());
+                    }
+                    break;
             }
-
-            if (isNumeric) {
-                int numericValue = Integer.parseInt(value);
-                switch (condition[2]) {
-                    case "=":
-                        return tree.subMap(value, true, value, true).keySet();
-                    case "<":
-                        return tree.headMap(String.valueOf(numericValue), false).keySet();
-                    case ">":
-                        return tree.tailMap(String.valueOf(numericValue), false).keySet();
-                    case "<=":
-                        return tree.headMap(String.valueOf(numericValue), true).keySet();
-                    case ">=":
-                        return tree.tailMap(String.valueOf(numericValue), true).keySet();
-                    default:
-                        return null;
-                }
-            } else {
-                switch (condition[2]) {
-                    case "=":
-                        return tree.subMap(value, true, value, true).keySet();
-                    case "<":
-                        return tree.headMap(value, false).keySet();
-                    case ">":
-                        return tree.tailMap(value, false).keySet();
-                    case "<=":
-                        return tree.headMap(value, true).keySet();
-                    case ">=":
-                        return tree.tailMap(value, true).keySet();
-                    default:
-                        return null;
-                }
-            }
+            
         }
-        return null;
+        return resultSet;
     }
 }
