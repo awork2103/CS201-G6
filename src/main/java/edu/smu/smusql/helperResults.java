@@ -32,11 +32,11 @@ public class helperResults {
 
         for ( int i = 0 ; i < numberOfRuns; i++){
             prepopulateUserTable(random,  dbEngine,  numberOfQueries, results);
-            //System.gc(); 
+            System.gc(); 
             updateRandomDataUsersTable(random, dbEngine, numberOfQueries,results);
-            //System.gc(); 
+            System.gc(); 
             selectFromUsersWithWhere(dbEngine, results);
-            //System.gc(); 
+            System.gc(); 
             deleteAllData(dbEngine, numberOfQueries, results);
             System.gc(); 
         }

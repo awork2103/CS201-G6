@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Results {
 
-    int hashMultiplier = 31;
+    int numberOfRuns = 5;
 
     private static final long MEGABYTE = 1024L * 1024L;
     private static final long nano = 1000000000;
@@ -134,19 +134,19 @@ public class Results {
         // chaining01Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 0.5");
-        chaining05Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.5), new Random(), numberOfQueries, hashMultiplier);
+        chaining05Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.5), new Random(), numberOfQueries, numberOfRuns );
         chaining05Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 0.75");
-        chaining075Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.75), new Random(), numberOfQueries, hashMultiplier);
+        chaining075Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.75), new Random(), numberOfQueries, numberOfRuns);
         chaining075Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 0.9");
-        chaining09Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.9), new Random(), numberOfQueries, hashMultiplier);
+        chaining09Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.9), new Random(), numberOfQueries, numberOfRuns);
         chaining09Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 2");
-        chaining2Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(2), new Random(), numberOfQueries, hashMultiplier);
+        chaining2Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(2), new Random(), numberOfQueries, numberOfRuns);
         chaining2Result.results(numberOfQueries);
 
         
@@ -169,16 +169,55 @@ public class Results {
         // linearProbe01Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 0.5");
-        linearProbe05Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.5), new Random(), numberOfQueries, hashMultiplier);
+        linearProbe05Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.5), new Random(), numberOfQueries, numberOfRuns);
         linearProbe05Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 0.75");
-        linearProbe075Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.75), new Random(), numberOfQueries, hashMultiplier);
+        linearProbe075Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.75), new Random(), numberOfQueries, numberOfRuns);
         linearProbe075Result.results(numberOfQueries);
 
         System.out.println("LOADFACTOR : 0.9");
-        linearProbe09Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.9), new Random(), numberOfQueries, hashMultiplier);
+        linearProbe09Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.9), new Random(), numberOfQueries, numberOfRuns);
         linearProbe09Result.results(numberOfQueries);
+    }
+
+    public void crudTestingHashingFunctions(){
+
+        long numberOfQueries = 1000;
+
+        TestResult defaultResult;
+        TestResult bitwiseResult;
+        TestResult additiveResult;
+        TestResult polynomialResult;
+        TestResult cyclicResult;
+
+        System.out.println("DEFAULT");
+
+
+        defaultResult = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap("DEFAULT"), new Random(), numberOfQueries, numberOfRuns);
+        defaultResult.results(numberOfRuns);
+
+        System.out.println("BITWISE");
+
+        bitwiseResult = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap("BITWISE"), new Random(), numberOfQueries, numberOfRuns);
+        bitwiseResult.results(numberOfRuns);
+
+        System.out.println("ADDITIVE");
+
+        additiveResult = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap("ADDITIVE"), new Random(), numberOfQueries, numberOfRuns);
+        additiveResult.results(numberOfRuns);
+
+        System.out.println("POLYNOMIAL");
+
+        polynomialResult = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap("POLYNOMIAL"), new Random(), numberOfQueries, numberOfRuns);
+        polynomialResult.results(numberOfRuns);
+
+        System.out.println("CYCLIC");
+
+        cyclicResult= helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap("CYCLIC"), new Random(), numberOfQueries, numberOfRuns);
+        cyclicResult.results(numberOfRuns);
+        
+
     }
 
 
@@ -190,17 +229,19 @@ public class Results {
         Results testingobj = new Results();
 
         //Tests the meomory and time of inserting between hashtrees storing the data vs hashmaps
-        testingobj.testHashMapWithTreesInsertionComparison();
+        //testingobj.testHashMapWithTreesInsertionComparison();
 
         //Tests the performance of each function
         //testingobj.testHashFunction();
 
         //Tests the performace of crud between the hashtrees vs hashmaps
-        testingobj.crudTestingTreeMapAndNormal();
+        //testingobj.crudTestingTreeMapAndNormal();
 
         // testingobj.crudTestingLoadFactorsChaining();
 
         // testingobj.crudTestingLoadLinear();
+
+        testingobj.crudTestingHashingFunctions();
 
     
         
