@@ -205,7 +205,10 @@ public class EngineHashMapPlusTree extends Engine{
 
         Set<String> ids = evaluateWhereConditions(table, whereConditions);
         for (String id : ids) {
-            table.getEntry(id).forEach((key, value) -> result.append(value).append("\t"));
+            for (String column : columns) {
+                result.append(table.getEntry(id).getOrDefault(column, "NULL")).append("\t");
+            }
+            result.append("\n");
         }
 
         return result.toString();
@@ -331,40 +334,6 @@ public class EngineHashMapPlusTree extends Engine{
         }
         return whereClauseConditions;
     }
-
-    // Helper method to evaluate a single condition
-    // private boolean evaluateCondition(String columnValue, String operator, String value) {
-    //     if (columnValue == null) {
-    //         return false;
-    //     }
-    
-    //     // Check if both the column value and the comparison value are numeric
-    //     boolean isNumeric = isNumeric(columnValue) && isNumeric(value);
-    
-    //     if (isNumeric) {
-    //         double columnNumber = Double.parseDouble(columnValue);
-    //         double valueNumber = Double.parseDouble(value);
-    
-    //         switch (operator) {
-    //             case "=": return columnNumber == valueNumber;
-    //             case ">": return columnNumber > valueNumber;
-    //             case "<": return columnNumber < valueNumber;
-    //             case ">=": return columnNumber >= valueNumber;
-    //             case "<=": return columnNumber <= valueNumber;
-    //             default: return false;
-    //         }
-    //     } else {
-    //         // Fallback to string comparison
-    //         switch (operator) {
-    //             case "=": return columnValue.equals(value);
-    //             case ">": return columnValue.compareTo(value) > 0;
-    //             case "<": return columnValue.compareTo(value) < 0;
-    //             case ">=": return columnValue.compareTo(value) >= 0;
-    //             case "<=": return columnValue.compareTo(value) <= 0;
-    //             default: return false;
-    //         }
-    //     }
-    // }
     
 
     // Helper method to determine if a string is an operator
@@ -372,19 +341,13 @@ public class EngineHashMapPlusTree extends Engine{
         return token.equals("=") || token.equals(">") || token.equals("<") || token.equals(">=") || token.equals("<=");
     }
 
-    // Helper method to determine if a string is numeric
-    private boolean isNumeric(String str) {
-        try {
-            Double.parseDouble(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
     // Method to evaluate where conditions
     private Set<String> evaluateWhereConditions(HashMapPlusTree map, List<String[]> conditions) {
 
+        if (conditions.isEmpty()) {
+            return map.getTable().keySet();
+        }
+        
         Set<String> ids = new HashSet<>();
         boolean nextConditionShouldMatch = true; // If true == AND operator, if false == OR operator
         for (String[] condition : conditions) {
@@ -405,10 +368,6 @@ public class EngineHashMapPlusTree extends Engine{
         return ids;
     }
     
-    // Helper method to access table data from HashMapPlusTree
-    private Map<String, HashMap<String, String>> getTableData(HashMapPlusTree table) {
-        return table.getTable();
-    }
 
     public List<String[]> parseUpdate(String[] tokens) {
         List<String[]> whereClauseConditions = new ArrayList<>();
