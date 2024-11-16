@@ -10,7 +10,7 @@ public class Main {
      *  Main method for accessing the command line interface of the database engine.
      *  MODIFICATION OF THIS FILE IS NOT RECOMMENDED!
      */
-    static Engine dbEngine = new Engine();
+    static Engine dbEngine = new EngineHashMapPlusTree();
 
     public static void main(String[] args) {
 

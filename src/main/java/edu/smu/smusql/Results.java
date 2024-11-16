@@ -101,7 +101,7 @@ public class Results {
 
     public void crudTestingTreeMapAndNormal(){
 
-        long numberOfQueries = 1000;
+        long numberOfQueries = 5000;
         TestResult HashtreeMapResults;
         TestResult controlEngineResults;
         int numOfRuns = 5;
@@ -237,7 +237,7 @@ public class Results {
         //Tests the performace of crud between the hashtrees vs hashmaps
         //testingobj.crudTestingTreeMapAndNormal();
 
-        // testingobj.crudTestingLoadFactorsChaining();
+        testingobj.crudTestingLoadFactorsChaining();
 
         // testingobj.crudTestingLoadLinear();
 
