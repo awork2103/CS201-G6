@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 //import edu.smu.smusql.SeparateChainingHashMap;    
+import java.util.stream.IntStream;
 
 public class EngineSeparateChainingHashMap extends Engine{
     //Store the SQL Tables
@@ -93,57 +94,49 @@ public class EngineSeparateChainingHashMap extends Engine{
     }
 
     public String delete(String[] tokens) {
-        // Check SQL syntax: DELETE FROM <table> WHERE <column> <operator> <value>
-        if (!tokens[1].toUpperCase().equals("FROM") || !tokens[3].toUpperCase().equals("WHERE")) {
+        // Validate syntax: Ensure "FROM" and "WHERE" are present
+        if (!tokens[1].toUpperCase().equals("FROM") || tokens.length < 4 || !tokens[3].toUpperCase().equals("WHERE")) {
             return "ERROR: Invalid DELETE syntax";
         }
-
-        // Get the table name
+    
         String tableName = tokens[2];
         if (!tables.containsKey(tableName)) {
             return "ERROR: Table does not exist";
         }
-
+    
         // Get the table object
         CustomHashMapChaining table = tables.get(tableName);
-
-        // Get the column, operator, and value from the WHERE clause
-        String column = tokens[4];
-        String operator = tokens[5];
-        String value = tokens[6];
-
-        // Check if the operator is valid (e.g., =, <, >, <=, >=)
-        if (!isOperator(operator)) {
-            return "ERROR: Unsupported operator in DELETE statement";
+    
+        // Parse WHERE conditions using parseDelete (similar to the second version)
+        List<String[]> whereConditions = parseDelete(tokens);
+    
+        if (whereConditions.isEmpty()) {
+            return "ERROR: Invalid or unsupported WHERE conditions";
         }
-
-        // Handle the case where the column is "ID" and operator is "="
-        if (column.equalsIgnoreCase("ID") && operator.equals("=")) {
-            table.deleteEntry(value); // Directly delete entry by ID
-            return "Entry with ID " + value + " deleted.";
-        } else {
-            // Handle the case where we need to evaluate conditions
-            Set<String> idsToDelete = new HashSet<>();
-
-            // Loop through the table to find matching entries
-            for (String id : table.getKeys()) {
-                SeparateChainingHashMap<String, String> entry = table.getEntry(id);
-                if (entry != null) {
-                    String columnValue = entry.get(column);
-
-                    if (evaluateCondition(columnValue, operator, value)) {
-                        idsToDelete.add(id); // Collect IDs that match the WHERE condition
-                    }
-                }
+    
+        // Set to store IDs of rows to delete
+        Set<String> idsToDelete = new HashSet<>();
+    
+        // Iterate over the rows in the table
+        for (String id : table.getKeys()) {
+            SeparateChainingHashMap<String, String> entry = table.getEntry(id);
+            if (entry == null) continue; // Skip if entry is null
+    
+            // Evaluate if entry matches all the WHERE conditions
+            boolean match = evaluateWhereConditions(entry, whereConditions);
+    
+            if (match) {
+                idsToDelete.add(id); // Add matching row ID to the set
             }
-
-            // Delete all matching entries
-            for (String id : idsToDelete) {
-                table.deleteEntry(id);
-            }
-
-            return idsToDelete.size() + " entries deleted.";
         }
+    
+        // Delete all matching rows
+        for (String id : idsToDelete) {
+            table.deleteEntry(id);
+        }
+    
+        // Return the result
+        return "SUCCESS: " + idsToDelete.size() + " row(s) deleted from " + tableName;
     }
 
     // SELECT * from <table> where <column> <operator> <value>
@@ -194,12 +187,11 @@ public class EngineSeparateChainingHashMap extends Engine{
     }
 
     public String update(String[] tokens) {
-        // Check SQL syntax: UPDATE <table> SET <column1> = <value1>, ... WHERE <conditions>
+        // Validate syntax: Ensure "SET" is present and properly positioned
         if (!tokens[2].toUpperCase().equals("SET")) {
             return "ERROR: Invalid UPDATE syntax";
         }
     
-        // Get the table name
         String tableName = tokens[1];
         if (!tables.containsKey(tableName)) {
             return "ERROR: Table does not exist";
@@ -208,25 +200,32 @@ public class EngineSeparateChainingHashMap extends Engine{
         // Get the table object
         CustomHashMapChaining table = tables.get(tableName);
     
-        // Parse the SET clause (the list of columns and values to update)
-        int setIndex = Arrays.asList(tokens).indexOf("SET");
-        int whereIndex = Arrays.asList(tokens).indexOf("WHERE");
+        // Find indices of SET and WHERE using IntStream for flexibility
+        int setIndex = IntStream.range(0, tokens.length)
+                                .filter(i -> tokens[i].equalsIgnoreCase("SET"))
+                                .findFirst()
+                                .orElse(-1);
+    
+        int whereIndex = IntStream.range(0, tokens.length)
+                                  .filter(i -> tokens[i].equalsIgnoreCase("WHERE"))
+                                  .findFirst()
+                                  .orElse(-1);
     
         // Ensure WHERE clause exists
         if (whereIndex == -1) {
             return "ERROR: Missing WHERE clause";
         }
     
-        // Parse the column-value pairs for the SET clause
+        // Parse the SET clauses (the column-value pairs to update)
         String[] setClauses = Arrays.copyOfRange(tokens, setIndex + 1, whereIndex);
         Map<String, String> updates = new HashMap<>();
     
-        // Extract column-value pairs (e.g., column1 = value1, column2 = value2)
         for (int i = 0; i < setClauses.length; i += 3) {
             String column = setClauses[i];
             String operator = setClauses[i + 1];
             String value = setClauses[i + 2].replace(",", ""); // Remove any trailing commas
     
+            // Check if the operator is valid
             if (!operator.equals("=")) {
                 return "ERROR: Invalid operator in SET clause";
             }
@@ -236,33 +235,33 @@ public class EngineSeparateChainingHashMap extends Engine{
                 return "ERROR: Column " + column + " does not exist in table " + tableName;
             }
     
-            // Add the update to the map
+            // Add the column-value pair to the updates map
             updates.put(column, value);
         }
     
-        // Parse WHERE conditions, including inequalities
-        List<String[]> whereConditions = parseWhereConditions(tokens);
+        // Parse WHERE conditions using parseUpdate (for conditions on which rows to update)
+        List<String[]> whereConditions = parseUpdate(tokens);
     
-        // Update the matching entries in the table
         int updatedCount = 0;
+    
+        // Iterate over rows and apply updates where conditions are met
         for (String key : table.getKeys()) {
             SeparateChainingHashMap<String, String> entry = table.getEntry(key);
-            if (entry == null) {
-                continue;
-            }
+            if (entry == null) continue;
     
-            // Evaluate WHERE conditions for this entry
+            // Check if the current entry matches the WHERE conditions
             boolean match = evaluateWhereConditions(entry, whereConditions);
     
-            // If the entry matches the WHERE conditions, apply the updates
             if (match) {
+                // Apply updates to the matching entry
                 for (Map.Entry<String, String> update : updates.entrySet()) {
                     entry.put(update.getKey(), update.getValue());
                 }
-                updatedCount++;
+                updatedCount++; // Increment the updated row count
             }
         }
     
+        // Return the result of the update operation
         return "SUCCESS: " + updatedCount + " row(s) updated in " + tableName;
     }
     
@@ -295,7 +294,7 @@ public class EngineSeparateChainingHashMap extends Engine{
         return "Table " + tableName + " created successfully with columns: " + columns;
     }
 
-    /*
+   /*
      *  HELPER METHODS
      */
     // Helper method to extract content inside parentheses
@@ -322,7 +321,7 @@ public class EngineSeparateChainingHashMap extends Engine{
                     String operator = tokens[i];
                     String value = tokens[i + 1];
                     whereClauseConditions.add(new String[]{null, column, operator, value});
-                    i += 1; // Skip the value since it has been processed
+                    i += 1; //  Skip the value since it has been processed
                 }
             }
         }
@@ -388,28 +387,92 @@ public class EngineSeparateChainingHashMap extends Engine{
 
     // Method to evaluate where conditions
     private boolean evaluateWhereConditions(SeparateChainingHashMap<String, String> row, List<String[]> conditions) {
-        boolean overallMatch = true;
-        boolean nextConditionShouldMatch = true; // Default behavior for AND
-
+        boolean result = false;  // Default result should be false
+        boolean currentCondition = true; // Tracks the result of the current condition
+    
+        // Track if an OR operator was encountered
+        boolean previousConditionWasOR = false;
+    
         for (String[] condition : conditions) {
-            if (condition[0] != null) { // AND/OR operator
-                nextConditionShouldMatch = condition[0].equals("AND");
+            if (condition[0] != null) {  // Logical operator (AND/OR)
+                if (condition[0].equals("AND")) {
+                    // Apply AND logic: Combine currentCondition with result
+                    result = result && currentCondition;
+                    currentCondition = true; // Reset for the next condition
+                } else if (condition[0].equals("OR")) {
+                    // Apply OR logic: If the previous condition was OR, use OR
+                    if (previousConditionWasOR) {
+                        result = result || currentCondition;
+                    } else {
+                        result = currentCondition;
+                    }
+                    previousConditionWasOR = true;  // Mark that we encountered an OR
+                    currentCondition = true;  // Reset for the next condition
+                }
             } else {
-                // Parse column, operator, and value
+                // Evaluate individual condition (column, operator, value)
                 String column = condition[1];
                 String operator = condition[2];
                 String value = condition[3];
+    
+                currentCondition = evaluateCondition(row.get(column), operator, value);
+            }
+        }
+    
+        // After finishing evaluation, combine the final condition with result
+        result = result || currentCondition;  // If it's OR, the last condition may still apply
+    
+        return result;
+    }
 
-                boolean currentMatch = evaluateCondition(row.get(column), operator, value);
+    public List<String[]> parseUpdate(String[] tokens) {
+        List<String[]> whereClauseConditions = new ArrayList<>();
+    
+        int whereIndex = IntStream.range(0, tokens.length)
+                          .filter(i -> tokens[i].equalsIgnoreCase("WHERE"))
+                          .findFirst()
+                          .orElse(-1);
 
-                if (nextConditionShouldMatch) {
-                    overallMatch = overallMatch && currentMatch;
-                } else {
-                    overallMatch = overallMatch || currentMatch;
+        if (whereIndex != -1) {
+            for (int i = whereIndex + 1; i < tokens.length; i++) {
+                if (tokens[i].equalsIgnoreCase("AND") || tokens[i].equalsIgnoreCase("OR")) {
+                    // Logical operators
+                    whereClauseConditions.add(new String[]{tokens[i].toUpperCase(), null, null, null});
+                } else if (isOperator(tokens[i])) {
+                    // Conditions (column, operator, value)
+                    String column = tokens[i - 1];
+                    String operator = tokens[i];
+                    String value = tokens[i + 1];
+                    whereClauseConditions.add(new String[]{null, column, operator, value});
+                    i++; // Skip the value since it has been processed
                 }
             }
         }
-
-        return overallMatch;
+    
+        return whereClauseConditions;
     }
+
+    public List<String[]> parseDelete(String[] tokens) {
+
+        List<String[]> whereClauseConditions = new ArrayList<>(); // Array for storing conditions from the where clause.
+
+        // Parse WHERE clause conditions
+        if (tokens.length > 3 && tokens[3].toUpperCase().equals("WHERE")) {
+            for (int i = 4; i < tokens.length; i++) {
+                if (tokens[i].toUpperCase().equals("AND") || tokens[i].toUpperCase().equals("OR")) {
+                    // Add AND/OR conditions
+                    whereClauseConditions.add(new String[] {tokens[i].toUpperCase(), null, null, null});
+                } else if (isOperator(tokens[i])) {
+                    // Add condition with operator (column, operator, value)
+                    String column = tokens[i - 1];
+                    String operator = tokens[i];
+                    String value = tokens[i + 1];
+                    whereClauseConditions.add(new String[] {null, column, operator, value});
+                    i += 1; // Skip the value since it has been processed
+                }
+            }
+        }
+        return whereClauseConditions;
+    }
+
 }

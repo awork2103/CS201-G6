@@ -216,4 +216,9 @@ public class LinearProbeHashMap<K, V> {
     public boolean isEmpty() {
         return size == 0;
     }
+
+    public Object getOrDefault(K key, String defaultValue) {
+        V value = get(key); // Assuming `get` is your method to retrieve the value by key
+        return (value != null) ? value : defaultValue;
+    }
 }

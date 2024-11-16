@@ -2,7 +2,7 @@ package edu.smu.smusql;
 
 import java.util.*;
 
-public class CustomHashMapLinear {
+public class CustomHashMapLinear{
     private String tableName;
     private List<String> columns;
     private LinearProbeHashMap<String, LinearProbeHashMap<String, String>> table;
