@@ -120,7 +120,7 @@ public class Results {
     }
 
     public void crudTestingLoadFactorsChaining(){
-        long numberOfQueries = 1000;
+        long numberOfQueries = 6000;
 
         TestResult chaining01Result;
         TestResult chaining05Result;
@@ -130,6 +130,8 @@ public class Results {
 
         
         System.out.println("Seperate chaining Loadfactors tests");
+        System.out.println("Number of runs : " + numberOfRuns);
+        System.out.println("Number of queries : " + numberOfQueries);
         // System.out.println("LOADFACTOR : 0.1");
         // chaining01Result = helperResults.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(0.1), new Random(), numberOfQueries, hashMultiplier);
         // chaining01Result.results(numberOfQueries);
@@ -155,9 +157,9 @@ public class Results {
 
     }
 
-    public void crudTestingLoadLinear(){
+    public void crudTestingLoadFactorsLinear(){
 
-        long numberOfQueries = 1000;
+        long numberOfQueries = 5000;
 
         TestResult linearProbe01Result;
         TestResult linearProbe05Result;
@@ -165,6 +167,8 @@ public class Results {
         TestResult linearProbe09Result;
 
         System.out.println("Linear probing Loadfactors tests");
+        System.out.println("Number of runs : " + numberOfRuns);
+        System.out.println("Number of queries : " + numberOfQueries);
         // System.out.println("LOADFACTOR : 0.1");
         // linearProbe01Result = helperResults.testingCRUDOnlyUserTable(new EngineLinearProbeHashMap(0.1), new Random(), numberOfQueries, hashMultiplier);
         // linearProbe01Result.results(numberOfQueries);
@@ -235,6 +239,8 @@ public class Results {
         //Tests the performance of each function
         testingobj.testHashFunction();
 
+        //testingobj.crudTestingHashingFunctions();
+
         //Tests the performace of crud between the hashtrees vs hashmaps
         testingobj.crudTestingTreeMapAndNormal();
 
@@ -242,9 +248,9 @@ public class Results {
         //Tests crudfunctionality on varying load factors
         testingobj.crudTestingLoadFactorsChaining();
 
-        testingobj.crudTestingLoadLinear();
+        testingobj.crudTestingLoadFactorsLinear();
 
-        //testingobj.crudTestingHashingFunctions();
+        
 
     
         
