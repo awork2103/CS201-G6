@@ -141,7 +141,7 @@ public class helperResults {
 
         for (long i = 0; i < number; i++) {
             int id = random.nextInt((int)number) + 1;
-            int newAge = random.nextInt(60) + 20;
+            int newAge = random.nextInt(40) + 20;
             String updateUserQuery = "UPDATE users SET age = " + newAge + " WHERE id = " + id;
             dbEngine.executeSQL(updateUserQuery);
         }

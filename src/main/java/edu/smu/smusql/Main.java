@@ -38,27 +38,40 @@ public class Main {
 
 
             }else if (query.equalsIgnoreCase("testfunc")) {
+
+                // test 10 queries for validation it works
                 System.out.println("Default hashmap engine");
                 System.out.println();
                 Testing.testingCRUDOnlyUserTable(new Engine(), new Random(), 10);
 
-                // System.out.println("Hashmap and tree engine");
-                // System.out.println();
-                // Testing.testingCRUDOnlyUserTable(new EngineHashMapPlusTree(), new Random(), 10);
+                System.out.println("Hashmap and tree engine");
+                System.out.println();
+                Testing.testingCRUDOnlyUserTable(new EngineHashMapPlusTree(), new Random(), 10);
 
-                // System.out.println("Seperate chaining engine");
-                // System.out.println();
-                // Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(), new Random(), 10);
+                System.out.println("Seperate chaining engine");
+                System.out.println();
+                Testing.testingCRUDOnlyUserTable(new EngineSeparateChainingHashMap(), new Random(), 10);
 
-                // System.out.println("Linear probing engine");
-                // System.out.println();
-                // Testing.testingCRUDOnlyUserTable(new EngineLinearProbeHashMap(), new Random(), 10);
+                System.out.println("Linear probing engine");
+                System.out.println();
+                Testing.testingCRUDOnlyUserTable(new EngineLinearProbeHashMap(), new Random(), 10);
 
+                break;
             // inserting into 2 tables and see if it works
 
             }else if (query.equalsIgnoreCase("2tables")) { 
-                Testing.testing2tables(dbEngine, new Random());
+                System.out.println("Testing 2 table  insertion :");
+                Testing.testing2tables(new Engine(), new Random());
+
+                Testing.testing2tables( new EngineHashMapPlusTree(), new Random());
+
+                Testing.testing2tables( new EngineSeparateChainingHashMap(), new Random());
+                
+                Testing.testing2tables( new EngineLinearProbeHashMap(), new Random());
+       
                 System.out.println();
+
+                break;
 
             }
             System.out.println(dbEngine.executeSQL(query));

@@ -229,20 +229,22 @@ public class Results {
 
         Results testingobj = new Results();
 
-        //Tests the meomory and time of inserting between hashtrees storing the data vs hashmaps
-        //testingobj.testHashMapWithTreesInsertionComparison();
+        //Tests the memory and time of inserting between hashtrees storing the data vs hashmaps
+        testingobj.testHashMapWithTreesInsertionComparison();
 
         //Tests the performance of each function
-        //testingobj.testHashFunction();
+        testingobj.testHashFunction();
 
         //Tests the performace of crud between the hashtrees vs hashmaps
-        //testingobj.crudTestingTreeMapAndNormal();
+        testingobj.crudTestingTreeMapAndNormal();
 
-        //testingobj.crudTestingLoadFactorsChaining();
 
-        // testingobj.crudTestingLoadLinear();
+        //Tests crudfunctionality on varying load factors
+        testingobj.crudTestingLoadFactorsChaining();
 
-        testingobj.crudTestingHashingFunctions();
+        testingobj.crudTestingLoadLinear();
+
+        //testingobj.crudTestingHashingFunctions();
 
     
         
