@@ -1,6 +1,6 @@
 #CS201-6
 
-In order to run the experimentation results, go to Results.java and run the main function, in VScode it would be clicking the run beside the  main func.
+In order to run the experimentation results, go to Results.java and run the main function, in VScode it would be clicking the run beside the  main func. There are 
 
 In order to view validation that the engines work, run the maven file and type either testfunc or 2tables
 
